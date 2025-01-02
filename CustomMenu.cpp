@@ -3,10 +3,6 @@
 #include <iostream>
 #include <QMessageBox>
 
-void functionToBeCalled() {
-    QMessageBox::information(nullptr, "TO BE CALLED", "New File action triggered.");
-    std::cout << "In function to be called " << std::endl;
-}
 
 CustomMenu::CustomMenu(QWidget* parent):QMenuBar(parent) {
     QMenu *fileMenu = addMenu("File");
