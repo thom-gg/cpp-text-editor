@@ -31,6 +31,8 @@ MainWindow::MainWindow() {
 
         // Connect the signal from customMenu to a handler
         connect(customMenu, &CustomMenu::openFileRequested, fileManager, &FileManager::openFile);
+        connect(textEditor, &TextEditor::openFileRequested, fileManager, &FileManager::openFile);
+
         connect(customMenu, &CustomMenu::saveFileRequested, textEditor, &TextEditor::saveFileTriggered);
         connect(textEditor, &TextEditor::saveFileWithContent, fileManager, &FileManager::saveFile);
         connect(fileManager, &FileManager::openedFile, textEditor, &TextEditor::fileHasBeenOpened);
