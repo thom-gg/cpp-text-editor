@@ -17,9 +17,10 @@ class FileManager : public QWidget {
     public slots:
         void openFile();
         void saveFile(QString content);
+        void newEmptyFile();
 
     private:
-        // QString fileContent;
+        bool unknown_file = true; // true if its not a real file we're modifying but a new file, to be saved later
         QString fileName;
 
 };

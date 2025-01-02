@@ -25,13 +25,15 @@ MainWindow::MainWindow() {
 
 
         textEditor = new TextEditor();
-        // textEdit = new QTextEdit(this); 
         setCentralWidget(textEditor);
         
 
         // Connect the signal from customMenu to a handler
         connect(customMenu, &CustomMenu::openFileRequested, fileManager, &FileManager::openFile);
         connect(textEditor, &TextEditor::openFileRequested, fileManager, &FileManager::openFile);
+
+        connect(customMenu, &CustomMenu::newFileRequested, textEditor, &TextEditor::newEmptyFile);
+        connect(textEditor, &TextEditor::newEmptyFileRequested, fileManager, &FileManager::newEmptyFile);
 
         connect(customMenu, &CustomMenu::saveFileRequested, textEditor, &TextEditor::saveFileTriggered);
         connect(textEditor, &TextEditor::saveFileWithContent, fileManager, &FileManager::saveFile);
