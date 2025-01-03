@@ -8,13 +8,13 @@
 #include <QHBoxLayout>
 #include <QShortcut>
 #include <QTextCursor>
-
+#include <QPainter>
 #include <QTimer>
 
 void TextEditor::fileHasBeenOpened(QString & content) {
     if (this->textEdit == nullptr) {
         this->textEdit = new QTextEdit();
-        
+        this->textEdit->setFontPointSize(100);
 
         QVBoxLayout * mainLayout = new QVBoxLayout(this);
         mainLayout->setContentsMargins(0, 0, 0, 0);
@@ -99,6 +99,21 @@ void TextEditor::setupWelcomeScreen(QWidget * textEditor) {
         textEditor->setLayout(mainLayout);
 }
 
+
+void TextEditor::updateZooming(int amount) {
+    // will zoomOut if amount is negative
+    textEdit->zoomIn(amount);
+}
+
+// Handle mouse wheel
+void TextEditor::wheelEvent(QWheelEvent *event)  {
+    const double degrees = event->angleDelta().y() / 8.0;
+    updateZooming((degrees / 5));
+
+}
+
+
+
 TextEditor::TextEditor() {
      setupWelcomeScreen(this);
 
@@ -107,6 +122,11 @@ TextEditor::TextEditor() {
     saveShortcut->setAutoRepeat(false); // so it doesnt spam trigger when we keep it pressed
     connect(saveShortcut, &QShortcut::activated, this, &TextEditor::saveFileTriggered);
 
+    QShortcut * zoomInShortcut = new QShortcut(QKeySequence::ZoomIn, this);
+    connect(zoomInShortcut, &QShortcut::activated, this, [this]() {updateZooming(10);});
+
+    QShortcut * zoomOutShortcut = new QShortcut(QKeySequence::ZoomOut, this);
+    connect(zoomOutShortcut, &QShortcut::activated, this, [this]() {updateZooming(-10);});
         
  
 }

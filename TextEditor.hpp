@@ -4,12 +4,15 @@
 #include <QWidget>
 #include <QString>
 #include <QVBoxLayout>
+#include <QWheelEvent>
 
 class TextEditor: public QWidget {
     Q_OBJECT
     private:
         QTextEdit * textEdit = nullptr;
         void setupWelcomeScreen(QWidget *);
+        void updateZooming(int amount);
+
     public:
         TextEditor();
     signals:
@@ -21,5 +24,6 @@ class TextEditor: public QWidget {
         void saveFileTriggered();
         void newEmptyFile(); // receiving from CustomMenu that we need to create a new empty file
 
-    
+    protected:
+        void wheelEvent(QWheelEvent *event) override;
 };
