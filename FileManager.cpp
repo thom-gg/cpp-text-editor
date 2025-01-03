@@ -25,6 +25,7 @@ void FileManager::openFile() {
                     this->unknown_file = false;
                     // Emit the signal, with a reference to the content
                     emit openedFile(fileContent);
+                    emit signalFileSavedOrOpened(fileName);
             } else {
                 // Show an error message if the file couldn't be opened
                 QMessageBox::warning(nullptr, "Error", "Could not open the selected file.");
@@ -57,6 +58,7 @@ void FileManager::saveFile(QString content) {
             out << content;  
             file->close();    
             this->unknown_file = false; // if we successfully wrote here it is not an unknown file anymore
+            emit signalFileSavedOrOpened(this->fileName);
             
     } else {
             // Show an error message if the file couldn't be opened

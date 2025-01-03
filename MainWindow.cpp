@@ -17,6 +17,25 @@
 
 #include "FileManager.hpp"
 
+
+void MainWindow::textHasChanged() {
+    QString currentTitle = this->windowTitle();
+    QChar firstChar = currentTitle.at(0);
+    // If already a '*', no need to do anything
+    if (firstChar == '*') {
+        return;
+    }
+    else {
+        currentTitle.insert(0, '*');
+        setWindowTitle(currentTitle);
+    }
+
+}
+
+void MainWindow::fileWasSavedOrOpened(QString fileName) {
+    setWindowTitle("Text editor: " + fileName);
+}
+
 MainWindow::MainWindow() {
         customMenu = new CustomMenu(this);
         this->setMenuBar(customMenu);
@@ -38,6 +57,10 @@ MainWindow::MainWindow() {
         connect(customMenu, &CustomMenu::saveFileRequested, textEditor, &TextEditor::saveFileTriggered);
         connect(textEditor, &TextEditor::saveFileWithContent, fileManager, &FileManager::saveFile);
         connect(fileManager, &FileManager::openedFile, textEditor, &TextEditor::fileHasBeenOpened);
+
+        connect(textEditor, &TextEditor::signalFileHasBeenModified, this, &MainWindow::textHasChanged);
+        connect(fileManager, &FileManager::signalFileSavedOrOpened, this, &MainWindow::fileWasSavedOrOpened);
+
         // Set up the main window
         QScreen *screen = QGuiApplication::primaryScreen();
         QRect  screenGeometry = screen->geometry();

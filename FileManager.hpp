@@ -12,7 +12,7 @@ class FileManager : public QWidget {
 
     signals:
         void openedFile(QString &);
-
+        void signalFileSavedOrOpened(QString fileName);
 
     public slots:
         void openFile();

@@ -12,10 +12,12 @@ class TextEditor: public QWidget {
         QTextEdit * textEdit = nullptr;
         void setupWelcomeScreen(QWidget *);
         void updateZooming(int amount);
+        void setupQTextEdit();
 
     public:
         TextEditor();
     signals:
+        void signalFileHasBeenModified(); // to be caught by MainWindow to update window title
         void saveFileWithContent(QString);
         void openFileRequested();
         void newEmptyFileRequested(); // sending to FileManager that we are creating an empty file

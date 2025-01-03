@@ -13,18 +13,7 @@
 
 void TextEditor::fileHasBeenOpened(QString & content) {
     if (this->textEdit == nullptr) {
-        this->textEdit = new QTextEdit();
-        this->textEdit->setFontPointSize(100);
-
-        QVBoxLayout * mainLayout = new QVBoxLayout(this);
-        mainLayout->setContentsMargins(0, 0, 0, 0);
-        mainLayout->setSpacing(0);
-
-        mainLayout->addWidget(this->textEdit);
-        if (this->layout()) {
-            delete this->layout(); // Clean up the old layout
-        }
-        this->setLayout(mainLayout);
+        setupQTextEdit();
     }
 
     // Change the content of the text editor
@@ -112,6 +101,25 @@ void TextEditor::wheelEvent(QWheelEvent *event)  {
 
 }
 
+// Called when we get out of welcome screen
+void TextEditor::setupQTextEdit() {
+        this->textEdit = new QTextEdit();
+        this->textEdit->setFontPointSize(100);
+
+        QVBoxLayout * mainLayout = new QVBoxLayout(this);
+        mainLayout->setContentsMargins(0, 0, 0, 0);
+        mainLayout->setSpacing(0);
+
+        mainLayout->addWidget(this->textEdit);
+        if (this->layout()) {
+            delete this->layout(); // Clean up the old layout
+        }
+        this->setLayout(mainLayout);
+
+        // Connect the "textChanged" signal from QTextEdit class to a custom one we're sending
+        // (why? because I plan on getting rid of QTextEdit class later and implement all of this myself)
+        connect(this->textEdit, &QTextEdit::textChanged, this, [this]() {emit signalFileHasBeenModified();});
+}
 
 
 TextEditor::TextEditor() {
@@ -127,6 +135,7 @@ TextEditor::TextEditor() {
 
     QShortcut * zoomOutShortcut = new QShortcut(QKeySequence::ZoomOut, this);
     connect(zoomOutShortcut, &QShortcut::activated, this, [this]() {updateZooming(-10);});
+
         
  
 }
