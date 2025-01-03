@@ -42,12 +42,14 @@ void TextEditor::saveFileTriggered() {
     // Emit signal to be caught by FileManager and actually saves the file. We pass the content (QString) as parameter
     emit saveFileWithContent(textEdit->toPlainText());
 
+    QColor originalColor = textEdit->palette().color(QPalette::Base);
     // Little animation (light green blink), to visually notify that it has been saved
-     this->textEdit->setStyleSheet("QTextEdit { background-color: #e6ffe6 }");  
+     this->textEdit->setStyleSheet("QTextEdit { background-color:rgb(47, 54, 47) }");  
 
      // Create a single-shot timer to revert back to white after 200ms
-     QTimer::singleShot(100, this, [this]() {
-        textEdit->setStyleSheet("QTextEdit { background-color: white }");
+     QTimer::singleShot(100, this, [this, originalColor]() {
+        textEdit->setStyleSheet(QString("QTextEdit { background-color: %1 }")
+                                .arg(originalColor.name()));
      });
     
 }
@@ -104,7 +106,7 @@ void TextEditor::wheelEvent(QWheelEvent *event)  {
 // Called when we get out of welcome screen
 void TextEditor::setupQTextEdit() {
         this->textEdit = new QTextEdit();
-        this->textEdit->setFontPointSize(100);
+        this->textEdit->zoomIn(5);
 
         QVBoxLayout * mainLayout = new QVBoxLayout(this);
         mainLayout->setContentsMargins(0, 0, 0, 0);

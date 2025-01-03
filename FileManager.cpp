@@ -10,6 +10,8 @@
 // we store it in the unknown_file member
 void FileManager::newEmptyFile() {
     this->unknown_file = true;
+    QString untitled("untitled");
+    emit signalFileSavedOrOpened(untitled);
 }
 
 void FileManager::openFile() {
