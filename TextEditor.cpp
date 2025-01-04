@@ -10,11 +10,19 @@
 #include <QTextCursor>
 #include <QPainter>
 #include <QTimer>
+#include <QPoint>
+#include <QPixmap>
+
+#include "SillyCat.hpp"
+#include "CatFactory.hpp"
+
 
 void TextEditor::fileHasBeenOpened(QString & content) {
     if (this->textEdit == nullptr) {
         setupQTextEdit();
+        factory->startTimer();
     }
+    
 
     // Change the content of the text editor
     this->textEdit->setPlainText(content);
@@ -137,6 +145,9 @@ TextEditor::TextEditor() {
 
     QShortcut * zoomOutShortcut = new QShortcut(QKeySequence::ZoomOut, this);
     connect(zoomOutShortcut, &QShortcut::activated, this, [this]() {updateZooming(-10);});
+  
+    
+    factory = new CatFactory(this);
 
         
  

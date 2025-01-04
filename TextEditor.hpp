@@ -6,10 +6,13 @@
 #include <QVBoxLayout>
 #include <QWheelEvent>
 
+class CatFactory; // for circular dependencies
+
 class TextEditor: public QWidget {
     Q_OBJECT
     private:
         QTextEdit * textEdit = nullptr;
+        CatFactory* factory = nullptr;
         void setupWelcomeScreen(QWidget *);
         void updateZooming(int amount);
         void setupQTextEdit();
