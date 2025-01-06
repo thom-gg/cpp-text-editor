@@ -104,6 +104,15 @@ void TextBuffer::right(int distance) {
     }
 }
 
+void TextBuffer::backspace() {
+    // move left pointer one to the left
+    leftPointer -= 1;
+}
+
+void TextBuffer::delete_after() {
+    rightPointer += 1;
+}
+
 
 void TextBuffer::printBuffer() {
     std::cout<<"TextBuffer: ";
@@ -116,4 +125,6 @@ void TextBuffer::printBuffer() {
     
     std::cout<<std::endl;
 }
+
+
 
