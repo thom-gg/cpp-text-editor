@@ -5,6 +5,7 @@
 #include <QString>
 #include <QVBoxLayout>
 #include <QWheelEvent>
+#include "./buffer/TextBuffer.hpp"
 
 class CatFactory; // for circular dependencies
 
@@ -13,12 +14,15 @@ class TextEditor: public QWidget {
     private:
         QTextEdit * textEdit = nullptr;
         CatFactory* factory = nullptr;
+        TextBuffer * textBuffer = nullptr;
         void setupWelcomeScreen(QWidget *);
         void updateZooming(int amount);
         void setupQTextEdit();
 
     public:
         TextEditor();
+        ~TextEditor();
+        QPoint getCursorPosition();
     signals:
         void signalFileHasBeenModified(); // to be caught by MainWindow to update window title
         void saveFileWithContent(QString);
@@ -31,4 +35,5 @@ class TextEditor: public QWidget {
 
     protected:
         void wheelEvent(QWheelEvent *event) override;
+        void paintEvent(QPaintEvent *event) override;
 };

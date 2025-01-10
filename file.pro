@@ -12,7 +12,8 @@ SOURCES += \
     FileManager.cpp \
     TextEditor.cpp \
     ./fun/SillyCat.cpp \
-    ./fun/CatFactory.cpp
+    ./fun/CatFactory.cpp \
+    ./buffer/TextBuffer.cpp
 
 HEADERS += \
     MainWindow.hpp \
@@ -20,7 +21,8 @@ HEADERS += \
     FileManager.hpp \
     TextEditor.hpp  \
     ./fun/SillyCat.hpp \
-    ./fun/CatFactory.hpp
+    ./fun/CatFactory.hpp \
+    ./buffer/TextBuffer.hpp
 
 
 # Qt modules

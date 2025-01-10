@@ -132,23 +132,102 @@ void TextEditor::setupQTextEdit() {
 }
 
 
+    void TextEditor::paintEvent(QPaintEvent *event)  {
+        std::cout << "paint event " << std::endl;
+        // Drawing text
+        QPainter painter(this);
+        painter.setPen(Qt::white);
+        // using a monospace font so we can count the width for each character and know where to break line
+        painter.setFont(QFont("Courier", 49));
+
+        QRect bounds = painter.boundingRect(rect(), Qt::AlignLeft, "A");
+        int charWidth = bounds.width();
+        int charHeight = bounds.height();
+
+        int maxWidth = width();
+
+
+        QString currWord("");
+
+        int xCoord = 0;
+        int yCoord = 10 + charHeight;
+
+        
+        for (int i = 0; i<textBuffer->length(); i++) {
+            char c = textBuffer->charAt(i);
+            QChar ch = c;
+            currWord += ch;
+
+            if ( c == ' ') {
+                // print currWord if needed
+                int wordWidth = currWord.length() * charWidth;
+                if ( (xCoord + wordWidth) > maxWidth) {
+                    // break line
+                    xCoord = 0;
+                    yCoord += charHeight;
+                }
+                painter.drawText(xCoord,yCoord,currWord);
+
+                xCoord += wordWidth;
+                currWord.clear();
+            }
+
+
+        }
+        // draw last word if no spaces at the end
+        int wordWidth = currWord.length() * charWidth;
+        if ( (xCoord + wordWidth) > maxWidth) {
+            // break line
+            xCoord = 0;
+            yCoord += charHeight;
+            }
+            painter.drawText(xCoord,yCoord,currWord);
+
+            xCoord += wordWidth;
+            currWord.clear();
+         }
+
+
+
 TextEditor::TextEditor() {
-     setupWelcomeScreen(this);
+    // Dummy data to try the paint function
+    textBuffer = new TextBuffer("Hello everyone this is a test text to try printing it out on the screen.", 72);
+    //  setupWelcomeScreen(this);
 
-    // Bind CTRL+S to save slot
-    QShortcut * saveShortcut = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_S), this);
-    saveShortcut->setAutoRepeat(false); // so it doesnt spam trigger when we keep it pressed
-    connect(saveShortcut, &QShortcut::activated, this, &TextEditor::saveFileTriggered);
+    // // Bind CTRL+S to save slot
+    // QShortcut * saveShortcut = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_S), this);
+    // saveShortcut->setAutoRepeat(false); // so it doesnt spam trigger when we keep it pressed
+    // connect(saveShortcut, &QShortcut::activated, this, &TextEditor::saveFileTriggered);
 
-    QShortcut * zoomInShortcut = new QShortcut(QKeySequence::ZoomIn, this);
-    connect(zoomInShortcut, &QShortcut::activated, this, [this]() {updateZooming(10);});
+    // QShortcut * zoomInShortcut = new QShortcut(QKeySequence::ZoomIn, this);
+    // connect(zoomInShortcut, &QShortcut::activated, this, [this]() {updateZooming(10);});
 
-    QShortcut * zoomOutShortcut = new QShortcut(QKeySequence::ZoomOut, this);
-    connect(zoomOutShortcut, &QShortcut::activated, this, [this]() {updateZooming(-10);});
+    // QShortcut * zoomOutShortcut = new QShortcut(QKeySequence::ZoomOut, this);
+    // connect(zoomOutShortcut, &QShortcut::activated, this, [this]() {updateZooming(-10);});
   
     
-    factory = new CatFactory(this);
+    // factory = new CatFactory(this);
 
         
  
+}
+
+TextEditor::~TextEditor() {
+    if (textBuffer != nullptr) {
+        delete textBuffer;
+    }
+    if (factory != nullptr) {
+        delete factory;
+    }
+    if (textEdit != nullptr) {
+        delete textEdit;
+    }
+}
+
+
+QPoint TextEditor::getCursorPosition() {
+    QPoint q = textEdit->mapToGlobal(textEdit->cursorRect().topLeft());
+
+    return q;
+
 }
