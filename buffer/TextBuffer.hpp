@@ -13,6 +13,10 @@ class TextBuffer {
 
         void printBuffer();
 
+        int length();
+        char charAt(int index);
+        char operator[](int index);
+
         void backspace();
         void delete_after(); // corresponds to the 'suppr' key on keyboard
     private:

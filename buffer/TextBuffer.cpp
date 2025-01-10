@@ -126,5 +126,27 @@ void TextBuffer::printBuffer() {
     std::cout<<std::endl;
 }
 
+int TextBuffer::length() {
+    int gapBufferSize = rightPointer - leftPointer;
+    return bufSize - gapBufferSize;
+}
 
+char TextBuffer::charAt(int index) {
+    int gapBufferSize = rightPointer - leftPointer;
+    if (index > (bufSize - gapBufferSize)) {
+        // out of bounds
+        return NULL;
+    }
+    // if index is in gap buffer we want to go over it (and do + )
+    if (index >=leftPointer && index < rightPointer) {
+        index += gapBufferSize;
+    }
+
+    return buffer[index];
+    
+}   
+
+char TextBuffer::operator[](int index) {
+    return this->charAt(index);
+}
 
