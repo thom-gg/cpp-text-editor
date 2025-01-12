@@ -13,6 +13,7 @@ class TextEditor : public QWidget
 {
     Q_OBJECT
 private:
+    int cursorPosition;
     int X_OFFSET = 50;
     QTextEdit *textEdit = nullptr;
     CatFactory *factory = nullptr;
@@ -21,11 +22,11 @@ private:
     void updateZooming(int amount);
     void setupQTextEdit();
     void printNewLine(int &xCoord, int &yCoord, int &charHeight, int &lineNumber, QPainter &painter);
+    void moveCursor(int delta);
 
 public:
     TextEditor();
     ~TextEditor();
-    QPoint getCursorPosition();
 signals:
     void signalFileHasBeenModified(); // to be caught by MainWindow to update window title
     void saveFileWithContent(QString);

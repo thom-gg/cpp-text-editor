@@ -144,7 +144,7 @@ void TextEditor::printNewLine(int &xCoord, int &yCoord, int &charHeight, int &li
 
 void TextEditor::paintEvent(QPaintEvent *event)
 {
-    std::cout << "paint event " << std::endl;
+    std::cout << "paint event cursor pos = " << cursorPosition << std::endl;
     // Drawing text
     QPainter painter(this);
     painter.setPen(Qt::white);
@@ -167,9 +167,13 @@ void TextEditor::paintEvent(QPaintEvent *event)
 
     int length = textBuffer->length();
 
+    int cursorXCoord = 0;
+    int cursorYCoord = 0;
+
     // We iterate on each char (and once after to print the last word)
     for (int i = 0; i <= length; i++)
     {
+       
         char c;
         if (i < length)
         {
@@ -202,14 +206,42 @@ void TextEditor::paintEvent(QPaintEvent *event)
         {
             printNewLine(xCoord, yCoord, charHeight, lineNumber, painter);
         }
+         if (i == cursorPosition) {
+            // draw cursor
+            painter.drawLine(xCoord + (currWord.length() * charWidth), 
+                            yCoord-charHeight+5, 
+                            xCoord + (currWord.length() * charWidth), 
+                            yCoord);
+        }
     }
+    // draw cursor
+    // painter.drawLine(cursorXCoord, cursorYCoord-charHeight+5, cursorXCoord, cursorYCoord);
+}
+
+void TextEditor::moveCursor(int delta) {
+    this->cursorPosition += delta;
+    if (cursorPosition < 0) {cursorPosition = 0;}
+    int length = this->textBuffer->length();
+    if (cursorPosition > length) {cursorPosition = length;}
+    update();
 }
 
 TextEditor::TextEditor()
 {
     // Dummy data to try the paint function
     textBuffer = new TextBuffer("Hello !\nThis is a test text to try printing test on the screen by myself without using the QTextEdit component.", 111);
+    cursorPosition = 2;
     //  setupWelcomeScreen(this);
+
+    QShortcut * rightArrow = new QShortcut(QKeySequence::MoveToNextChar, this);
+    connect(rightArrow, &QShortcut::activated, this, [this]() {
+        this->TextEditor::moveCursor(1);
+        });
+        
+    QShortcut * leftArrow = new QShortcut(QKeySequence::MoveToPreviousChar, this);
+    connect(leftArrow, &QShortcut::activated, this, [this]() {
+        this->TextEditor::moveCursor(-1);
+    });
 
     // // Bind CTRL+S to save slot
     // QShortcut * saveShortcut = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_S), this);
@@ -241,9 +273,3 @@ TextEditor::~TextEditor()
     }
 }
 
-QPoint TextEditor::getCursorPosition()
-{
-    QPoint q = textEdit->mapToGlobal(textEdit->cursorRect().topLeft());
-
-    return q;
-}
