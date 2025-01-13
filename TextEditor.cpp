@@ -136,7 +136,7 @@ void TextEditor::printNewLine(int &xCoord, int &yCoord, int &charHeight, int &li
     yCoord += charHeight;
     lineNumber += 1;
     painter.setPen(Qt::gray);
-    painter.drawText(0, yCoord, QString("%1:").arg(lineNumber));
+    painter.drawText(QRect(0, yCoord, charWidth*2, charHeight), 0, QString("%1:").arg(lineNumber));
     painter.setPen(Qt::white);
 
     xCoord = X_OFFSET;
@@ -144,31 +144,38 @@ void TextEditor::printNewLine(int &xCoord, int &yCoord, int &charHeight, int &li
 
 void TextEditor::paintEvent(QPaintEvent *event)
 {
-    std::cout << "paint event cursor pos = " << cursorPosition << std::endl;
+
     // Drawing text
     QPainter painter(this);
     painter.setPen(Qt::white);
     // using a monospace font so we can count the width for each character and know where to break line
     painter.setFont(QFont("Courier", 20));
+    
+    
 
     QRect bounds = painter.boundingRect(rect(), Qt::AlignLeft, "A");
-    int charWidth = bounds.width();
-    int charHeight = bounds.height();
-
+    charWidth = bounds.width();
+    charHeight = bounds.height();
+    Y_OFFSET = charHeight;
     int maxWidth = width();
+    int maxHeight = height();
+
+    // draw a grid
+    for (int i = 0; i<maxWidth; i+=charWidth) {
+        for (int j = 0; j<maxHeight; j+=charHeight) {
+            painter.drawRect(i,j,charWidth, charHeight);
+        }
+    }
 
     QString currWord("");
 
     int lineNumber = 0;
     int xCoord = X_OFFSET;
-    int yCoord = 10;
+    int yCoord = 0;
 
     printNewLine(xCoord, yCoord, charHeight, lineNumber, painter);
 
     int length = textBuffer->length();
-
-    int cursorXCoord = 0;
-    int cursorYCoord = 0;
 
     // We iterate on each char (and once after to print the last word)
     for (int i = 0; i <= length; i++)
@@ -196,7 +203,7 @@ void TextEditor::paintEvent(QPaintEvent *event)
                 yCoord += charHeight;
             }
             // print the word we just completed
-            painter.drawText(xCoord, yCoord, currWord);
+            painter.drawText(QRect(xCoord, yCoord, wordWidth, charHeight), Qt::AlignCenter, currWord);
 
             xCoord += wordWidth;
             currWord.clear();
@@ -214,15 +221,50 @@ void TextEditor::paintEvent(QPaintEvent *event)
                             yCoord);
         }
     }
+    painter.setPen(Qt::red);
+
+    painter.drawLine(X_OFFSET + (cursorX*charWidth), 
+                        (Y_OFFSET + (cursorY * charHeight) ),
+                        X_OFFSET + (cursorX*charWidth),
+                        (Y_OFFSET + (cursorY * charHeight) )+charHeight);
+
     // draw cursor
     // painter.drawLine(cursorXCoord, cursorYCoord-charHeight+5, cursorXCoord, cursorYCoord);
 }
 
-void TextEditor::moveCursor(int delta) {
-    this->cursorPosition += delta;
-    if (cursorPosition < 0) {cursorPosition = 0;}
-    int length = this->textBuffer->length();
-    if (cursorPosition > length) {cursorPosition = length;}
+void TextEditor::mousePressEvent(QMouseEvent* event) {
+    if (event->button() != Qt::LeftButton) {return;}
+    // QPointF pos = event->position();
+    int x = event->x();
+    int y = event->y();
+    if (x < X_OFFSET || y < Y_OFFSET) {return;}
+    // determine if its left or right of the char
+   
+    
+    int xCoord = (x-X_OFFSET) / charWidth;
+    int yCoord = (y-Y_OFFSET) / charHeight; 
+    int offset = x % charWidth;
+    if (offset >= (charWidth / 2)) {
+        xCoord += 1;
+        std::cout<<"right side of the char"<<std::endl;
+    }
+    else {
+        std::cout<<"left sidze of the char"<<std::endl;
+    }
+    cursorX = xCoord;
+    cursorY = yCoord;
+    update();
+    std::cout << "mouse prsees event x:"<<x<<" y:"<<y << " grid = " << xCoord <<","<<yCoord<< std::endl;
+
+}
+
+
+void TextEditor::moveCursor(int deltaX, int deltaY) {
+    this->cursorX += deltaX;
+    this->cursorY += deltaY;
+    if (this->cursorX < 0) {cursorX = 0;}
+    if (this->cursorY < 0) {cursorY = 0;}
+    
     update();
 }
 
@@ -233,14 +275,26 @@ TextEditor::TextEditor()
     cursorPosition = 2;
     //  setupWelcomeScreen(this);
 
+
+
     QShortcut * rightArrow = new QShortcut(QKeySequence::MoveToNextChar, this);
     connect(rightArrow, &QShortcut::activated, this, [this]() {
-        this->TextEditor::moveCursor(1);
+        this->TextEditor::moveCursor(1, 0);
         });
         
     QShortcut * leftArrow = new QShortcut(QKeySequence::MoveToPreviousChar, this);
     connect(leftArrow, &QShortcut::activated, this, [this]() {
-        this->TextEditor::moveCursor(-1);
+        this->TextEditor::moveCursor(-1, 0);
+    });
+
+    QShortcut * upArrow = new QShortcut(QKeySequence::MoveToPreviousLine, this);
+    connect(upArrow, &QShortcut::activated, this, [this]() {
+        this->TextEditor::moveCursor(0, -1);
+    });
+
+    QShortcut * downArrow = new QShortcut(QKeySequence::MoveToNextLine, this);
+    connect(downArrow, &QShortcut::activated, this, [this]() {
+        this->TextEditor::moveCursor(0, 1);
     });
 
     // // Bind CTRL+S to save slot

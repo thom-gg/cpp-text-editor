@@ -13,8 +13,13 @@ class TextEditor : public QWidget
 {
     Q_OBJECT
 private:
+    int charWidth = 0;
+    int charHeight = 0;
+    int cursorX = 0;
+    int cursorY = 0;
     int cursorPosition;
     int X_OFFSET = 50;
+    int Y_OFFSET = 0;
     QTextEdit *textEdit = nullptr;
     CatFactory *factory = nullptr;
     TextBuffer *textBuffer = nullptr;
@@ -22,7 +27,7 @@ private:
     void updateZooming(int amount);
     void setupQTextEdit();
     void printNewLine(int &xCoord, int &yCoord, int &charHeight, int &lineNumber, QPainter &painter);
-    void moveCursor(int delta);
+    void moveCursor(int deltaX, int deltaY);
 
 public:
     TextEditor();
@@ -40,4 +45,6 @@ public slots:
 protected:
     void wheelEvent(QWheelEvent *event) override;
     void paintEvent(QPaintEvent *event) override;
+    void mousePressEvent(QMouseEvent* event) override;
+
 };
