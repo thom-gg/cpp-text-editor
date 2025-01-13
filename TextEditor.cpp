@@ -161,11 +161,11 @@ void TextEditor::paintEvent(QPaintEvent *event)
     int maxHeight = height();
 
     // draw a grid
-    for (int i = 0; i<maxWidth; i+=charWidth) {
-        for (int j = 0; j<maxHeight; j+=charHeight) {
-            painter.drawRect(i,j,charWidth, charHeight);
-        }
-    }
+    // for (int i = 0; i<maxWidth; i+=charWidth) {
+    //     for (int j = 0; j<maxHeight; j+=charHeight) {
+    //         painter.drawRect(i,j,charWidth, charHeight);
+    //     }
+    // }
 
     QString currWord("");
 
@@ -177,10 +177,17 @@ void TextEditor::paintEvent(QPaintEvent *event)
 
     int length = textBuffer->length();
 
+    bool cursor_drawn = false;
+    // edge case, if the cursor is at the very beginning
+    if (cursorX == 0 && cursorY == 0) {
+        cursorIndex = 0;
+        cursor_drawn = true;
+    }
     // We iterate on each char (and once after to print the last word)
     for (int i = 0; i <= length; i++)
     {
-       
+      
+
         char c;
         if (i < length)
         {
@@ -192,10 +199,11 @@ void TextEditor::paintEvent(QPaintEvent *event)
                 currWord += ch;
             }
         }
-
+        int wordLength;
         if (i == length || c == ' ' || c == '\n')
         { // when we encounter a space or for last iteration
-            int wordWidth = currWord.length() * charWidth;
+            wordLength = currWord.length();
+           int wordWidth = wordLength * charWidth;
             if ((xCoord + wordWidth) > maxWidth)
             {
                 // break line if needed
@@ -209,27 +217,80 @@ void TextEditor::paintEvent(QPaintEvent *event)
             currWord.clear();
         }
 
+        int currCellX = (xCoord - X_OFFSET) / charWidth;
+        int currCellY = (yCoord - Y_OFFSET) / charHeight;
+        
+        if (!cursor_drawn &&  cursorX == 0 && currCellX == 0 && cursorY == currCellY) {
+            // first char of a new line
+            cursor_drawn = true;
+            cursorIndex = i;
+        }
+
+        if (!cursor_drawn && cursorX <= currCellX && cursorY == currCellY) {
+            // if cursor was in this word, then lets draw cursor
+            int wordWidth = wordLength * charWidth;
+            int coordDebutWord = (xCoord - wordWidth);
+            int cellDebutWord = (coordDebutWord - X_OFFSET) / charWidth;
+            int dist = cursorX - cellDebutWord;
+
+            cursor_drawn = true;
+            // how many cells on the left was the cursor
+            cursorIndex = (i - (wordLength-1)) + dist;            
+
+        }
         if (c == '\n')
         {
+            // before going to new line, if cursor is on this line, but further on the right, then cursor should be here
+            if (cursorX >= currCellX && cursorY == currCellY) {
+                cursor_drawn = true;
+                cursorX = currCellX;
+                cursorIndex = i;
+            }
             printNewLine(xCoord, yCoord, charHeight, lineNumber, painter);
         }
-         if (i == cursorPosition) {
-            // draw cursor
-            painter.drawLine(xCoord + (currWord.length() * charWidth), 
-                            yCoord-charHeight+5, 
-                            xCoord + (currWord.length() * charWidth), 
-                            yCoord);
-        }
-    }
-    painter.setPen(Qt::red);
 
+         
+    }
+    // if we didnt see cursor, it is further than the end of the text, we bring it back to the end of the text
+    if (!cursor_drawn) {
+        std::cout << "in the last if " << std::endl;
+        cursorX = (xCoord - X_OFFSET) / charWidth;
+        cursorY = (yCoord - Y_OFFSET) / charHeight;
+        cursorIndex = length;
+    }
+
+    // drawing cursor
+    painter.setPen(Qt::red);
     painter.drawLine(X_OFFSET + (cursorX*charWidth), 
                         (Y_OFFSET + (cursorY * charHeight) ),
                         X_OFFSET + (cursorX*charWidth),
                         (Y_OFFSET + (cursorY * charHeight) )+charHeight);
 
-    // draw cursor
-    // painter.drawLine(cursorXCoord, cursorYCoord-charHeight+5, cursorXCoord, cursorYCoord);
+    std::cout << "End of paint event, cursorInex = " << cursorIndex << std::endl;
+
+  
+}
+
+void TextEditor::keyPressEvent(QKeyEvent * event) {
+    // sync cursor
+    
+    switch (event->key()) {
+        case Qt::Key_Backspace:
+            std::cout << " backspace " << std::endl;
+            break;
+        case Qt::Key_Enter:
+        case Qt::Key_Return:
+            std::cout << " pressing enter " << std::endl;
+            break;
+
+        default:
+            char c = (event->text())[0].unicode();
+            std::cout << "Key pressed : ["<<c<<"]"<<std::endl;
+            break;
+    }
+
+    // do the modification
+    
 }
 
 void TextEditor::mousePressEvent(QMouseEvent* event) {
@@ -272,8 +333,12 @@ TextEditor::TextEditor()
 {
     // Dummy data to try the paint function
     textBuffer = new TextBuffer("Hello !\nThis is a test text to try printing test on the screen by myself without using the QTextEdit component.", 111);
-    cursorPosition = 2;
     //  setupWelcomeScreen(this);
+
+    setCursor(Qt::IBeamCursor);
+    // give focus to this widget
+    setFocusPolicy(Qt::StrongFocus);
+
 
 
 

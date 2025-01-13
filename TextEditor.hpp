@@ -17,7 +17,7 @@ private:
     int charHeight = 0;
     int cursorX = 0;
     int cursorY = 0;
-    int cursorPosition;
+    int cursorIndex;
     int X_OFFSET = 50;
     int Y_OFFSET = 0;
     QTextEdit *textEdit = nullptr;
@@ -46,5 +46,7 @@ protected:
     void wheelEvent(QWheelEvent *event) override;
     void paintEvent(QPaintEvent *event) override;
     void mousePressEvent(QMouseEvent* event) override;
+    void keyPressEvent(QKeyEvent *event) override;
+
 
 };
