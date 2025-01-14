@@ -266,7 +266,7 @@ void TextEditor::paintEvent(QPaintEvent *event)
                         X_OFFSET + (cursorX*charWidth),
                         (Y_OFFSET + (cursorY * charHeight) )+charHeight);
 
-    // std::cout << "End of paint event, cursorInex = " << cursorIndex << std::endl;
+    std::cout << "End of paint event, cursorIndex = " << cursorIndex << std::endl;
     this->textBuffer->printBuffer();
   
 }
@@ -275,14 +275,15 @@ void TextEditor::keyPressEvent(QKeyEvent * event) {
     // sync cursor
     int key = event->key();
     std::cout << "key = " << key << std::endl;
-    this->textBuffer->moveCursor(cursorIndex);
 
     switch (event->key()) {
         case Qt::Key_Shift:
         case Qt::ALT:
+        case Qt::Key_Tab:
             return;
 
         case Qt::Key_Backspace:
+            this->textBuffer->moveCursor(cursorIndex);
             std::cout << " backspace " << std::endl;
             this->textBuffer->backspace();
             cursorIndex -=1;
@@ -290,6 +291,7 @@ void TextEditor::keyPressEvent(QKeyEvent * event) {
             break;
         case Qt::Key_Enter:
         case Qt::Key_Return:
+            this->textBuffer->moveCursor(cursorIndex);
             std::cout << " pressing enter " << std::endl;
             this->textBuffer->insert('\n');
             cursorIndex += 1;
@@ -297,8 +299,13 @@ void TextEditor::keyPressEvent(QKeyEvent * event) {
             break;
 
         default:
-            char c = (event->text())[0].unicode();
-            // std::cout << "Key pressed : ["<<c<<"]"<<std::endl;
+            this->textBuffer->moveCursor(cursorIndex);
+            bool shiftPressed = event->modifiers() & Qt::ShiftModifier;
+            if (!shiftPressed && (key>=65 && key <= 90)) {
+                key += 32;
+            }
+            char c = key;
+            std::cout << "Key pressed : ["<<c<<"]"<<std::endl;
             this->textBuffer->insert(c);
             cursorIndex += 1;
             moveCursor(1, 0);

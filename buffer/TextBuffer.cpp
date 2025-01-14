@@ -35,7 +35,6 @@ TextBuffer::~TextBuffer() {
 
 void TextBuffer::insert(char c) {
     // grow if necessary
-    std::cout<<"Inserting char " <<c << std::endl;
     if (leftPointer == rightPointer) {
         grow();
     }
@@ -71,6 +70,7 @@ void TextBuffer::grow() {
 
 
 void TextBuffer::moveCursor(int position) {
+    std::cout << "Moving cursor to position " << position << " leftPoitner was " << leftPointer << std::endl;
     // need to move the gap left or right
     int currentPos = leftPointer;
     if (position == currentPos) {return;}
@@ -104,6 +104,7 @@ void TextBuffer::right(int distance) {
 
 void TextBuffer::backspace() {
     // move left pointer one to the left
+    if (leftPointer == 0) {return;}
     leftPointer -= 1;
 }
 
