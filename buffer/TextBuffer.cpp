@@ -23,9 +23,6 @@ TextBuffer::TextBuffer(char * data, int dataSize) {
     // Initialize the left and right pointers
     leftPointer = dataSize;
     rightPointer = totalSize; 
-
-
-
 }   
 
 
@@ -38,6 +35,7 @@ TextBuffer::~TextBuffer() {
 
 void TextBuffer::insert(char c) {
     // grow if necessary
+    std::cout<<"Inserting char " <<c << std::endl;
     if (leftPointer == rightPointer) {
         grow();
     }
@@ -116,12 +114,16 @@ void TextBuffer::delete_after() {
 
 void TextBuffer::printBuffer() {
     std::cout<<"TextBuffer: ";
-    for (int i = 0; i<leftPointer; i++) {
-        std::cout<<buffer[i];
+    int l = this->length();
+    for (int i = 0; i<l; i++) {
+        std::cout << this->charAt(i);
     }
-    for (int i = rightPointer; i<bufSize; i++) {
-        std::cout<<buffer[i];
-    }
+    // for (int i = 0; i<leftPointer; i++) {
+    //     std::cout<<buffer[i];
+    // }
+    // for (int i = rightPointer; i<bufSize; i++) {
+    //     std::cout<<buffer[i];
+    // }
     
     std::cout<<std::endl;
 }
@@ -133,12 +135,13 @@ int TextBuffer::length() {
 
 char TextBuffer::charAt(int index) {
     int gapBufferSize = rightPointer - leftPointer;
-    if (index > (bufSize - gapBufferSize)) {
+    if (index >= (bufSize - gapBufferSize)) {
         // out of bounds
         return NULL;
     }
-    // if index is in gap buffer we want to go over it (and do + )
-    if (index >=leftPointer && index < rightPointer) {
+    
+    // adapt index if needed
+    if (index >=leftPointer) {
         index += gapBufferSize;
     }
 

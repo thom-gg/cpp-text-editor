@@ -266,30 +266,45 @@ void TextEditor::paintEvent(QPaintEvent *event)
                         X_OFFSET + (cursorX*charWidth),
                         (Y_OFFSET + (cursorY * charHeight) )+charHeight);
 
-    std::cout << "End of paint event, cursorInex = " << cursorIndex << std::endl;
-
+    // std::cout << "End of paint event, cursorInex = " << cursorIndex << std::endl;
+    this->textBuffer->printBuffer();
   
 }
 
 void TextEditor::keyPressEvent(QKeyEvent * event) {
     // sync cursor
-    
+    int key = event->key();
+    std::cout << "key = " << key << std::endl;
+    this->textBuffer->moveCursor(cursorIndex);
+
     switch (event->key()) {
+        case Qt::Key_Shift:
+        case Qt::ALT:
+            return;
+
         case Qt::Key_Backspace:
             std::cout << " backspace " << std::endl;
+            this->textBuffer->backspace();
+            cursorIndex -=1;
+            moveCursor(-1, 0);
             break;
         case Qt::Key_Enter:
         case Qt::Key_Return:
             std::cout << " pressing enter " << std::endl;
+            this->textBuffer->insert('\n');
+            cursorIndex += 1;
+            moveCursor(1, 0);
             break;
 
         default:
             char c = (event->text())[0].unicode();
-            std::cout << "Key pressed : ["<<c<<"]"<<std::endl;
+            // std::cout << "Key pressed : ["<<c<<"]"<<std::endl;
+            this->textBuffer->insert(c);
+            cursorIndex += 1;
+            moveCursor(1, 0);
             break;
     }
 
-    // do the modification
     
 }
 
@@ -332,7 +347,7 @@ void TextEditor::moveCursor(int deltaX, int deltaY) {
 TextEditor::TextEditor()
 {
     // Dummy data to try the paint function
-    textBuffer = new TextBuffer("Hello !\nThis is a test text to try printing test on the screen by myself without using the QTextEdit component.", 111);
+    textBuffer = new TextBuffer("Hello !", 7);
     //  setupWelcomeScreen(this);
 
     setCursor(Qt::IBeamCursor);
