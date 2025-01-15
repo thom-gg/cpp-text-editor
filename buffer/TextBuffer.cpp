@@ -70,7 +70,6 @@ void TextBuffer::grow() {
 
 
 void TextBuffer::moveCursor(int position) {
-    std::cout << "Moving cursor to position " << position << " leftPoitner was " << leftPointer << std::endl;
     // need to move the gap left or right
     int currentPos = leftPointer;
     if (position == currentPos) {return;}

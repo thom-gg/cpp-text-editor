@@ -183,11 +183,12 @@ void TextEditor::paintEvent(QPaintEvent *event)
         cursorIndex = 0;
         cursor_drawn = true;
     }
+    std::cout << "Paint Event: cursorX = " << cursorX << " cursorY == " << cursorY << std::endl;
+
     // We iterate on each char (and once after to print the last word)
     for (int i = 0; i <= length; i++)
     {
-      
-
+    
         char c;
         if (i < length)
         {
@@ -228,14 +229,26 @@ void TextEditor::paintEvent(QPaintEvent *event)
 
         if (!cursor_drawn && cursorX <= currCellX && cursorY == currCellY) {
             // if cursor was in this word, then lets draw cursor
+            
             int wordWidth = wordLength * charWidth;
             int coordDebutWord = (xCoord - wordWidth);
             int cellDebutWord = (coordDebutWord - X_OFFSET) / charWidth;
+            int indexDebutWord = (i+1) - wordLength;
+            if (i == length) {indexDebutWord-=1;} // if we are in the last iteration we should not account this iteration
+            if (c == '\n') {indexDebutWord -= 1;} // if c == newline, the wordLength should be one char shorter
+            if (indexDebutWord < 0) {indexDebutWord = 0;}
             int dist = cursorX - cellDebutWord;
 
             cursor_drawn = true;
+
             // how many cells on the left was the cursor
-            cursorIndex = (i - (wordLength-1)) + dist;            
+            // std::cout<<" dist= " << dist << " i = " << i << " wordLength = " << wordLength << " indexDebutWord " << indexDebutWord << std::endl;
+            if (i - cellDebutWord == dist) {
+                cursorIndex = i;
+            }
+            else {
+                cursorIndex = indexDebutWord + dist;
+            }
 
         }
         if (c == '\n')
@@ -253,7 +266,7 @@ void TextEditor::paintEvent(QPaintEvent *event)
     }
     // if we didnt see cursor, it is further than the end of the text, we bring it back to the end of the text
     if (!cursor_drawn) {
-        std::cout << "in the last if " << std::endl;
+        std::cout << "in the last if, cursor was out of bounds " << cursorX << "#" << cursorY << std::endl;
         cursorX = (xCoord - X_OFFSET) / charWidth;
         cursorY = (yCoord - Y_OFFSET) / charHeight;
         cursorIndex = length;
@@ -276,6 +289,10 @@ void TextEditor::keyPressEvent(QKeyEvent * event) {
     int key = event->key();
     std::cout << "key = " << key << std::endl;
 
+    int deltaX = 0;
+    int deltaY = 0;
+    int maxWidth = (width() - X_OFFSET) / charWidth;
+
     switch (event->key()) {
         case Qt::Key_Shift:
         case Qt::ALT:
@@ -287,7 +304,10 @@ void TextEditor::keyPressEvent(QKeyEvent * event) {
             std::cout << " backspace " << std::endl;
             this->textBuffer->backspace();
             cursorIndex -=1;
-            moveCursor(-1, 0);
+            deltaX = -1;
+            deltaY = 0;            
+            if (cursorX == 0) {deltaY = -1;}
+
             break;
         case Qt::Key_Enter:
         case Qt::Key_Return:
@@ -295,7 +315,8 @@ void TextEditor::keyPressEvent(QKeyEvent * event) {
             std::cout << " pressing enter " << std::endl;
             this->textBuffer->insert('\n');
             cursorIndex += 1;
-            moveCursor(1, 0);
+            deltaX = -maxWidth; // put cursorX super on the left (even < 0), so it gets adjusted to 0 by moveCursor
+            deltaY = 1;
             break;
 
         default:
@@ -308,11 +329,16 @@ void TextEditor::keyPressEvent(QKeyEvent * event) {
             std::cout << "Key pressed : ["<<c<<"]"<<std::endl;
             this->textBuffer->insert(c);
             cursorIndex += 1;
-            moveCursor(1, 0);
+            deltaX = 1;
+            deltaY = 0;
+            if (cursorX + deltaX > maxWidth) {
+                deltaY += 1;
+            }
             break;
     }
 
-    
+    moveCursor(deltaX, deltaY);
+
 }
 
 void TextEditor::mousePressEvent(QMouseEvent* event) {
@@ -354,7 +380,7 @@ void TextEditor::moveCursor(int deltaX, int deltaY) {
 TextEditor::TextEditor()
 {
     // Dummy data to try the paint function
-    textBuffer = new TextBuffer("Hello !", 7);
+    textBuffer = new TextBuffer("Hello !\nThis is a test text.", 28);
     //  setupWelcomeScreen(this);
 
     setCursor(Qt::IBeamCursor);
