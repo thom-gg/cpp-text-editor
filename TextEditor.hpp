@@ -25,7 +25,7 @@ private:
     void setupWelcomeScreen(QWidget *);
     void updateZooming(int amount);
     void setupQTextEdit();
-    void printNewLine(int &xCoord, int &yCoord, int &charHeight, int &lineNumber, QPainter &painter);
+    void printNewLine(int , int &, QPainter &painter);
     void moveCursorIndex(int delta);
     void moveOneLineUp();
     void moveOneLineDown();

@@ -131,15 +131,15 @@ void TextEditor::setupQTextEdit()
     //         { emit signalFileHasBeenModified(); });
 }
 
-void TextEditor::printNewLine(int &xCoord, int &yCoord, int &charHeight, int &lineNumber, QPainter &painter)
+void TextEditor::printNewLine(int lineIndex, int & linesNumber, QPainter &painter)
 {
-    yCoord += charHeight;
-    lineNumber += 1;
+    linesNumber += 1; // draw line number
     painter.setPen(Qt::gray);
-    painter.drawText(QRect(0, yCoord, charWidth*2, charHeight), 0, QString("%1:").arg(lineNumber));
+    painter.setFont(QFont("Courier", 15));
+    painter.drawText(QRect(0, (Y_OFFSET + (lineIndex) * charHeight), charWidth*2, charHeight), Qt::AlignLeft | Qt::AlignVCenter, QString("%1:").arg(linesNumber));
     painter.setPen(Qt::white);
+    painter.setFont(QFont("Courier", 20));
 
-    xCoord = X_OFFSET;
 }
 
 void TextEditor::paintEvent(QPaintEvent *event) {
@@ -157,22 +157,23 @@ void TextEditor::paintEvent(QPaintEvent *event) {
     Y_OFFSET = charHeight;
     int maxWidth = width();
     int maxHeight = height();     
-    // draw a grid   
-    painter.setOpacity(0.1);
-    for (int i = 0; i<maxWidth; i+=charWidth) {
-        for (int j = 0; j<maxHeight; j+=charHeight) {
-            painter.drawRect(i,j,charWidth, charHeight);
-        }
-    }
-    painter.setOpacity(1);
+    // // draw a grid   
+    // painter.setOpacity(0.1);
+    // for (int i = 0; i<maxWidth; i+=charWidth) {
+    //     for (int j = 0; j<maxHeight; j+=charHeight) {
+    //         painter.drawRect(i,j,charWidth, charHeight);
+    //     }
+    // }
+    // painter.setOpacity(1);
 
     // split text into lines, handline \n and line wrapping
-
+    int linesNumber = 0;
     std::string currentLine;
     std::string currentWord;
     int currentWidth = X_OFFSET;
 
     int length = textBuffer->length();
+    printNewLine(lines.size(), linesNumber, painter);
 
     for (int i = 0; i < length; i++) {
         char c = textBuffer->charAt(i);
@@ -198,6 +199,11 @@ void TextEditor::paintEvent(QPaintEvent *event) {
                 lines.push_back(currentLine);
                 currentLine.clear();
                 currentWidth = X_OFFSET;
+
+                
+                printNewLine( lines.size(), linesNumber, painter);
+
+                
             }
         } else {
             currentWord += c;
