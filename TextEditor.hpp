@@ -15,19 +15,20 @@ class TextEditor : public QWidget
 private:
     int charWidth = 0;
     int charHeight = 0;
-    int cursorX = 0;
-    int cursorY = 0;
     int cursorIndex;
     int X_OFFSET = 50;
     int Y_OFFSET = 0;
-    QTextEdit *textEdit = nullptr;
+    std::vector<std::string> lines;
+
     CatFactory *factory = nullptr;
     TextBuffer *textBuffer = nullptr;
     void setupWelcomeScreen(QWidget *);
     void updateZooming(int amount);
     void setupQTextEdit();
     void printNewLine(int &xCoord, int &yCoord, int &charHeight, int &lineNumber, QPainter &painter);
-    void moveCursor(int deltaX, int deltaY);
+    void moveCursorIndex(int delta);
+    void moveOneLineUp();
+    void moveOneLineDown();
 
 public:
     TextEditor();

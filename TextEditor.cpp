@@ -18,18 +18,18 @@
 
 void TextEditor::fileHasBeenOpened(QString &content)
 {
-    if (this->textEdit == nullptr)
-    {
-        setupQTextEdit();
-        factory->startTimer();
-    }
+    // if (this->textEdit == nullptr)
+    // {
+    //     setupQTextEdit();
+    //     factory->startTimer();
+    // }
 
-    // Change the content of the text editor
-    this->textEdit->setPlainText(content);
-    // Set cursor initial position
-    QTextCursor cursor = textEdit->textCursor();
-    cursor.movePosition(QTextCursor::End);
-    textEdit->setTextCursor(cursor);
+    // // Change the content of the text editor
+    // this->textEdit->setPlainText(content);
+    // // Set cursor initial position
+    // QTextCursor cursor = textEdit->textCursor();
+    // cursor.movePosition(QTextCursor::End);
+    // textEdit->setTextCursor(cursor);
 }
 
 void TextEditor::newEmptyFile()
@@ -44,21 +44,21 @@ void TextEditor::newEmptyFile()
 // When the save button is pressed, or CTRL + S is pressed
 void TextEditor::saveFileTriggered()
 {
-    if (this->textEdit == nullptr)
-    {
-        return; // we're on welcome menu
-    }
-    // Emit signal to be caught by FileManager and actually saves the file. We pass the content (QString) as parameter
-    emit saveFileWithContent(textEdit->toPlainText());
+    // if (this->textEdit == nullptr)
+    // {
+    //     return; // we're on welcome menu
+    // }
+    // // Emit signal to be caught by FileManager and actually saves the file. We pass the content (QString) as parameter
+    // emit saveFileWithContent(textEdit->toPlainText());
 
-    QColor originalColor = textEdit->palette().color(QPalette::Base);
-    // Little animation (light green blink), to visually notify that it has been saved
-    this->textEdit->setStyleSheet("QTextEdit { background-color:rgb(47, 54, 47) }");
+    // QColor originalColor = textEdit->palette().color(QPalette::Base);
+    // // Little animation (light green blink), to visually notify that it has been saved
+    // this->textEdit->setStyleSheet("QTextEdit { background-color:rgb(47, 54, 47) }");
 
-    // Create a single-shot timer to revert back to white after 200ms
-    QTimer::singleShot(100, this, [this, originalColor]()
-                       { textEdit->setStyleSheet(QString("QTextEdit { background-color: %1 }")
-                                                     .arg(originalColor.name())); });
+    // // Create a single-shot timer to revert back to white after 200ms
+    // QTimer::singleShot(100, this, [this, originalColor]()
+    //                    { textEdit->setStyleSheet(QString("QTextEdit { background-color: %1 }")
+    //                                                  .arg(originalColor.name())); });
 }
 
 void TextEditor::setupWelcomeScreen(QWidget *textEditor)
@@ -98,7 +98,7 @@ void TextEditor::setupWelcomeScreen(QWidget *textEditor)
 void TextEditor::updateZooming(int amount)
 {
     // will zoomOut if amount is negative
-    textEdit->zoomIn(amount);
+    // textEdit->zoomIn(amount);
 }
 
 // Handle mouse wheel
@@ -111,24 +111,24 @@ void TextEditor::wheelEvent(QWheelEvent *event)
 // Called when we get out of welcome screen
 void TextEditor::setupQTextEdit()
 {
-    this->textEdit = new QTextEdit();
-    this->textEdit->zoomIn(5);
+    // this->textEdit = new QTextEdit();
+    // this->textEdit->zoomIn(5);
 
-    QVBoxLayout *mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(0, 0, 0, 0);
-    mainLayout->setSpacing(0);
+    // QVBoxLayout *mainLayout = new QVBoxLayout(this);
+    // mainLayout->setContentsMargins(0, 0, 0, 0);
+    // mainLayout->setSpacing(0);
 
-    mainLayout->addWidget(this->textEdit);
-    if (this->layout())
-    {
-        delete this->layout(); // Clean up the old layout
-    }
-    this->setLayout(mainLayout);
+    // mainLayout->addWidget(this->textEdit);
+    // if (this->layout())
+    // {
+    //     delete this->layout(); // Clean up the old layout
+    // }
+    // this->setLayout(mainLayout);
 
-    // Connect the "textChanged" signal from QTextEdit class to a custom one we're sending
-    // (why? because I plan on getting rid of QTextEdit class later and implement all of this myself)
-    connect(this->textEdit, &QTextEdit::textChanged, this, [this]()
-            { emit signalFileHasBeenModified(); });
+    // // Connect the "textChanged" signal from QTextEdit class to a custom one we're sending
+    // // (why? because I plan on getting rid of QTextEdit class later and implement all of this myself)
+    // connect(this->textEdit, &QTextEdit::textChanged, this, [this]()
+    //         { emit signalFileHasBeenModified(); });
 }
 
 void TextEditor::printNewLine(int &xCoord, int &yCoord, int &charHeight, int &lineNumber, QPainter &painter)
@@ -142,156 +142,138 @@ void TextEditor::printNewLine(int &xCoord, int &yCoord, int &charHeight, int &li
     xCoord = X_OFFSET;
 }
 
-void TextEditor::paintEvent(QPaintEvent *event)
-{
-
-    // Drawing text
+void TextEditor::paintEvent(QPaintEvent *event) {
     QPainter painter(this);
     painter.setPen(Qt::white);
     // using a monospace font so we can count the width for each character and know where to break line
     painter.setFont(QFont("Courier", 20));
     
-    
+    lines.clear();
+
 
     QRect bounds = painter.boundingRect(rect(), Qt::AlignLeft, "A");
     charWidth = bounds.width();
     charHeight = bounds.height();
     Y_OFFSET = charHeight;
     int maxWidth = width();
-    int maxHeight = height();
+    int maxHeight = height();     
+    // draw a grid   
+    painter.setOpacity(0.1);
+    for (int i = 0; i<maxWidth; i+=charWidth) {
+        for (int j = 0; j<maxHeight; j+=charHeight) {
+            painter.drawRect(i,j,charWidth, charHeight);
+        }
+    }
+    painter.setOpacity(1);
 
-    // draw a grid
-    // for (int i = 0; i<maxWidth; i+=charWidth) {
-    //     for (int j = 0; j<maxHeight; j+=charHeight) {
-    //         painter.drawRect(i,j,charWidth, charHeight);
-    //     }
-    // }
+    // split text into lines, handline \n and line wrapping
 
-    QString currWord("");
-
-    int lineNumber = 0;
-    int xCoord = X_OFFSET;
-    int yCoord = 0;
-
-    printNewLine(xCoord, yCoord, charHeight, lineNumber, painter);
+    std::string currentLine;
+    std::string currentWord;
+    int currentWidth = X_OFFSET;
 
     int length = textBuffer->length();
 
-    bool cursor_drawn = false;
-    // edge case, if the cursor is at the very beginning
-    if (cursorX == 0 && cursorY == 0) {
-        cursorIndex = 0;
-        cursor_drawn = true;
-    }
-    std::cout << "Paint Event: cursorX = " << cursorX << " cursorY == " << cursorY << std::endl;
+    for (int i = 0; i < length; i++) {
+        char c = textBuffer->charAt(i);
 
-    // We iterate on each char (and once after to print the last word)
-    for (int i = 0; i <= length; i++)
-    {
+        if (c == ' ' || c == '\n') {
+            // end of current  word
+            if ((currentWidth + (charWidth* currentWord.size())) > maxWidth) {
+                // word doesnt fit
+                lines.push_back(currentLine);
+                currentLine.clear();
+                currentWidth = X_OFFSET;
+            }
+
+            if (c == ' ') {
+                currentWord += c;
+                currentWidth += 1;
+            }
+            currentLine += currentWord;
+            currentWidth += charWidth * currentWord.size();
+            currentWord.clear();
+
+            if (c == '\n') {
+                lines.push_back(currentLine);
+                currentLine.clear();
+                currentWidth = X_OFFSET;
+            }
+        } else {
+            currentWord += c;
+        }
+    }
+
+    // if last word doesnt fit, make it go to next line
+    if (!currentWord.empty()) {
+        if ((currentWidth + (charWidth * currentWord.size())) > maxWidth) {
+        // Word doesn't fit, push the current line
+        lines.push_back(currentLine);
+        currentLine = currentWord;
+        } else {
+        currentLine += currentWord;
+        }
+    }
+
+    // add last line
+    if (!currentLine.empty()) {
+        lines.push_back(currentLine);
+    }
+
+   
+    // draw text line by line
+    int yCoord = Y_OFFSET;
+    for (int i = 0; i<lines.size(); i++) {
+        std::string & l = lines[i];
+        for (int j = 0; j < l.size(); j++) {
+            char c = l[j];
+            QRect charRect(X_OFFSET + (j * charWidth), yCoord, charWidth, charHeight);
+            painter.drawText(charRect, Qt::AlignCenter, QString(c));
+        }
+        yCoord += charHeight; // Move to the next line
+    } 
     
-        char c;
-        if (i < length)
-        {
-            c = textBuffer->charAt(i);
+    // cursorIndex is up to date, just find where to draw it
+    int cursorLine = -1;
+    int cursorChar = 0;
+    int totalChars = 0;
+     for (int i = 0; i<lines.size(); i++) {
+         std::string & l = lines[i];
+         int lSize = l.size();
 
-            if (c != '\n')
-            { // we dont draw a newline char, we handle it ourselves using our printNewLine
-                QChar ch = c;
-                currWord += ch;
-            }
+        if ( (totalChars + lSize) >= cursorIndex) {
+            cursorLine = i;
+            cursorChar = cursorIndex - totalChars;
+            break;
         }
-        int wordLength;
-        if (i == length || c == ' ' || c == '\n')
-        { // when we encounter a space or for last iteration
-            wordLength = currWord.length();
-           int wordWidth = wordLength * charWidth;
-            if ((xCoord + wordWidth) > maxWidth)
-            {
-                // break line if needed
-                xCoord = X_OFFSET;
-                yCoord += charHeight;
-            }
-            // print the word we just completed
-            painter.drawText(QRect(xCoord, yCoord, wordWidth, charHeight), Qt::AlignCenter, currWord);
+        totalChars += lSize;
 
-            xCoord += wordWidth;
-            currWord.clear();
-        }
+        char c = textBuffer->charAt(totalChars);
+        if (c == '\n') {totalChars+=1;}
+        yCoord += charHeight; // Move to the next line
+     }
+     if (cursorLine == -1) {
+        cursorLine = lines.size();
+     }
+     
+    int cursorX = X_OFFSET + (cursorChar * charWidth);
+    int cursorY = Y_OFFSET + (cursorLine * charHeight);
 
-        int currCellX = (xCoord - X_OFFSET) / charWidth;
-        int currCellY = (yCoord - Y_OFFSET) / charHeight;
-        
-        if (!cursor_drawn &&  cursorX == 0 && currCellX == 0 && cursorY == currCellY) {
-            // first char of a new line
-            cursor_drawn = true;
-            cursorIndex = i;
-        }
 
-        if (!cursor_drawn && cursorX <= currCellX && cursorY == currCellY) {
-            // if cursor was in this word, then lets draw cursor
-            
-            int wordWidth = wordLength * charWidth;
-            int coordDebutWord = (xCoord - wordWidth);
-            int cellDebutWord = (coordDebutWord - X_OFFSET) / charWidth;
-            int indexDebutWord = (i+1) - wordLength;
-            if (i == length) {indexDebutWord-=1;} // if we are in the last iteration we should not account this iteration
-            if (c == '\n') {indexDebutWord -= 1;} // if c == newline, the wordLength should be one char shorter
-            if (indexDebutWord < 0) {indexDebutWord = 0;}
-            int dist = cursorX - cellDebutWord;
-
-            cursor_drawn = true;
-
-            // how many cells on the left was the cursor
-            // std::cout<<" dist= " << dist << " i = " << i << " wordLength = " << wordLength << " indexDebutWord " << indexDebutWord << std::endl;
-            if (i - cellDebutWord == dist) {
-                cursorIndex = i;
-            }
-            else {
-                cursorIndex = indexDebutWord + dist;
-            }
-
-        }
-        if (c == '\n')
-        {
-            // before going to new line, if cursor is on this line, but further on the right, then cursor should be here
-            if (cursorX >= currCellX && cursorY == currCellY) {
-                cursor_drawn = true;
-                cursorX = currCellX;
-                cursorIndex = i;
-            }
-            printNewLine(xCoord, yCoord, charHeight, lineNumber, painter);
-        }
-
-         
-    }
-    // if we didnt see cursor, it is further than the end of the text, we bring it back to the end of the text
-    if (!cursor_drawn) {
-        std::cout << "in the last if, cursor was out of bounds " << cursorX << "#" << cursorY << std::endl;
-        cursorX = (xCoord - X_OFFSET) / charWidth;
-        cursorY = (yCoord - Y_OFFSET) / charHeight;
-        cursorIndex = length;
-    }
-
-    // drawing cursor
     painter.setPen(Qt::red);
-    painter.drawLine(X_OFFSET + (cursorX*charWidth), 
-                        (Y_OFFSET + (cursorY * charHeight) ),
-                        X_OFFSET + (cursorX*charWidth),
-                        (Y_OFFSET + (cursorY * charHeight) )+charHeight);
+    painter.drawLine(cursorX, cursorY, cursorX, cursorY + charHeight);
 
-    std::cout << "End of paint event, cursorIndex = " << cursorIndex << std::endl;
-    this->textBuffer->printBuffer();
-  
 }
+
 
 void TextEditor::keyPressEvent(QKeyEvent * event) {
     // sync cursor
     int key = event->key();
-    std::cout << "key = " << key << std::endl;
 
-    int deltaX = 0;
-    int deltaY = 0;
+   
     int maxWidth = (width() - X_OFFSET) / charWidth;
+    // sync cursor
+    this->textBuffer->moveCursor(cursorIndex);
 
     switch (event->key()) {
         case Qt::Key_Shift:
@@ -300,44 +282,29 @@ void TextEditor::keyPressEvent(QKeyEvent * event) {
             return;
 
         case Qt::Key_Backspace:
-            this->textBuffer->moveCursor(cursorIndex);
-            std::cout << " backspace " << std::endl;
             this->textBuffer->backspace();
-            cursorIndex -=1;
-            deltaX = -1;
-            deltaY = 0;            
-            if (cursorX == 0) {deltaY = -1;}
+            this->moveCursorIndex(-1);
+            
 
             break;
         case Qt::Key_Enter:
         case Qt::Key_Return:
-            this->textBuffer->moveCursor(cursorIndex);
-            std::cout << " pressing enter " << std::endl;
             this->textBuffer->insert('\n');
-            cursorIndex += 1;
-            deltaX = -maxWidth; // put cursorX super on the left (even < 0), so it gets adjusted to 0 by moveCursor
-            deltaY = 1;
+            this->moveCursorIndex(1);
             break;
 
         default:
-            this->textBuffer->moveCursor(cursorIndex);
             bool shiftPressed = event->modifiers() & Qt::ShiftModifier;
             if (!shiftPressed && (key>=65 && key <= 90)) {
                 key += 32;
             }
             char c = key;
-            std::cout << "Key pressed : ["<<c<<"]"<<std::endl;
             this->textBuffer->insert(c);
-            cursorIndex += 1;
-            deltaX = 1;
-            deltaY = 0;
-            if (cursorX + deltaX > maxWidth) {
-                deltaY += 1;
-            }
+            this->moveCursorIndex(1);
+            
             break;
     }
 
-    moveCursor(deltaX, deltaY);
 
 }
 
@@ -348,39 +315,121 @@ void TextEditor::mousePressEvent(QMouseEvent* event) {
     int y = event->y();
     if (x < X_OFFSET || y < Y_OFFSET) {return;}
     // determine if its left or right of the char
-   
     
-    int xCoord = (x-X_OFFSET) / charWidth;
-    int yCoord = (y-Y_OFFSET) / charHeight; 
-    int offset = x % charWidth;
-    if (offset >= (charWidth / 2)) {
-        xCoord += 1;
-        std::cout<<"right side of the char"<<std::endl;
+
+    int clickedLine = (y-Y_OFFSET) / charHeight;
+    if (clickedLine < 0) {
+        cursorIndex = 0;
+        update();
+        return;
+        
     }
-    else {
-        std::cout<<"left sidze of the char"<<std::endl;
+    if (clickedLine >=lines.size()) {
+        cursorIndex = textBuffer->length();
+        update();
+        return;
     }
-    cursorX = xCoord;
-    cursorY = yCoord;
+
+    const std::string &line = lines[clickedLine];
+    int clickedChar = (x-X_OFFSET)/charWidth;
+    if (clickedChar < 0) {clickedChar = 0;}
+    else if (clickedChar >= line.size()) {
+        clickedChar = line.size();
+    }
+
+    int cpt = 0;
+    for (int i = 0; i < clickedLine; i++) {
+        int size = lines[i].size();
+        cpt += size;
+        char c = textBuffer->charAt(cpt);
+        if (c == '\n') {cpt+=1;}
+    }
+    cpt += clickedChar;
+    cursorIndex = cpt;
+
+    this->textBuffer->moveCursor(cursorIndex);
+
+    
     update();
-    std::cout << "mouse prsees event x:"<<x<<" y:"<<y << " grid = " << xCoord <<","<<yCoord<< std::endl;
 
 }
 
 
-void TextEditor::moveCursor(int deltaX, int deltaY) {
-    this->cursorX += deltaX;
-    this->cursorY += deltaY;
-    if (this->cursorX < 0) {cursorX = 0;}
-    if (this->cursorY < 0) {cursorY = 0;}
-    
+
+void TextEditor::moveCursorIndex(int delta) {
+    cursorIndex += delta;
+    if (cursorIndex < 0) {cursorIndex = 0;}
+    int l = this->textBuffer->length();
+    if (cursorIndex > l) {cursorIndex = l;}
     update();
+}
+
+void TextEditor::moveOneLineUp() {
+    int totalChars = 0;
+    for (int i = 0; i<lines.size()-1; i++) {         
+        std::string & l = lines[i];
+
+        int sizeLine = l.size();        
+        char c = textBuffer->charAt(totalChars+sizeLine);
+        if (c == '\n') {sizeLine+=1;}
+        totalChars += sizeLine;
+
+        if (i == 0 && totalChars >= cursorIndex) {
+            // if we were on first line, get to the beginning of it
+            cursorIndex = 0;
+            break;
+        }
+
+        int totalAtNextLine = totalChars + lines[i+1].size();
+        if ( totalAtNextLine >= cursorIndex) { // if i+1 has the cursor, then i is the new line
+            // i is the new line
+            int cursorChar = (cursorIndex - totalChars);
+            if (cursorChar > sizeLine) {
+                cursorChar = l.size();
+            }
+            cursorIndex = (totalChars - sizeLine) + cursorChar;
+            
+            break;
+        }    
+    }
+    update();
+}
+
+void TextEditor::moveOneLineDown() {
+    int totalChars = 0;
+    for (int i = 0; i<lines.size(); i++) {
+         std::string & l = lines[i];
+         int sizeLine = l.size();        
+         char c = textBuffer->charAt(totalChars+sizeLine);
+         if (c == '\n') {sizeLine+=1;}
+
+        if ( (totalChars + l.size()) >= cursorIndex) {
+            // cursor is in line i
+            if (i == (lines.size() - 1)) { // if its last line then move cursor to the very end
+                cursorIndex = this->textBuffer->length();
+                break;
+            }
+
+            int cursorChar = cursorIndex - totalChars;
+            if (cursorChar > lines[i+1].size()) {
+                cursorChar = lines[i+1].size();
+            }
+            cursorIndex = totalChars + sizeLine + cursorChar;
+            break;
+        }
+        totalChars += sizeLine;
+     }
+
+    update();
+
 }
 
 TextEditor::TextEditor()
 {
     // Dummy data to try the paint function
-    textBuffer = new TextBuffer("Hello !\nThis is a test text.", 28);
+    char * initText = "Hello !\nThis is a test text. Here comes a long sentence to try out automatic line wrapping when words go out of bounds";
+    textBuffer = new TextBuffer(initText, strlen(initText));
+    cursorIndex = strlen(initText);
     //  setupWelcomeScreen(this);
 
     setCursor(Qt::IBeamCursor);
@@ -392,22 +441,22 @@ TextEditor::TextEditor()
 
     QShortcut * rightArrow = new QShortcut(QKeySequence::MoveToNextChar, this);
     connect(rightArrow, &QShortcut::activated, this, [this]() {
-        this->TextEditor::moveCursor(1, 0);
+        this->moveCursorIndex(1);
         });
         
     QShortcut * leftArrow = new QShortcut(QKeySequence::MoveToPreviousChar, this);
     connect(leftArrow, &QShortcut::activated, this, [this]() {
-        this->TextEditor::moveCursor(-1, 0);
+        this->moveCursorIndex(-1);
     });
 
     QShortcut * upArrow = new QShortcut(QKeySequence::MoveToPreviousLine, this);
     connect(upArrow, &QShortcut::activated, this, [this]() {
-        this->TextEditor::moveCursor(0, -1);
+        this->TextEditor::moveOneLineUp();
     });
 
     QShortcut * downArrow = new QShortcut(QKeySequence::MoveToNextLine, this);
     connect(downArrow, &QShortcut::activated, this, [this]() {
-        this->TextEditor::moveCursor(0, 1);
+        this->TextEditor::moveOneLineDown();
     });
 
     // // Bind CTRL+S to save slot
@@ -434,9 +483,6 @@ TextEditor::~TextEditor()
     {
         delete factory;
     }
-    if (textEdit != nullptr)
-    {
-        delete textEdit;
-    }
+    
 }
 
