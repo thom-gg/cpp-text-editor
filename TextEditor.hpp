@@ -20,6 +20,8 @@ private:
     int Y_OFFSET = 0;
     std::vector<std::string> lines;
 
+    int verticalScrollOffset = 0;
+
     CatFactory *factory = nullptr;
     TextBuffer *textBuffer = nullptr;
     void setupWelcomeScreen(QWidget *);

@@ -102,11 +102,11 @@ void TextEditor::updateZooming(int amount)
 }
 
 // Handle mouse wheel
-void TextEditor::wheelEvent(QWheelEvent *event)
-{
-    const double degrees = event->angleDelta().y() / 8.0;
-    updateZooming((degrees / 5));
-}
+// void TextEditor::wheelEvent(QWheelEvent *event)
+// {
+//     const double degrees = event->angleDelta().y() / 8.0;
+//     updateZooming((degrees / 5));
+// }
 
 // Called when we get out of welcome screen
 void TextEditor::setupQTextEdit()
@@ -136,7 +136,7 @@ void TextEditor::printNewLine(int lineIndex, int & linesNumber, QPainter &painte
     linesNumber += 1; // draw line number
     painter.setPen(Qt::gray);
     painter.setFont(QFont("Courier", 15));
-    painter.drawText(QRect(0, (Y_OFFSET + (lineIndex) * charHeight), charWidth*2, charHeight), Qt::AlignLeft | Qt::AlignVCenter, QString("%1:").arg(linesNumber));
+    painter.drawText(QRect(0, (Y_OFFSET + (lineIndex) * charHeight) - verticalScrollOffset, charWidth*2, charHeight), Qt::AlignLeft | Qt::AlignVCenter, QString("%1:").arg(linesNumber));
     painter.setPen(Qt::white);
     painter.setFont(QFont("Courier", 20));
 
@@ -228,7 +228,7 @@ void TextEditor::paintEvent(QPaintEvent *event) {
 
    
     // draw text line by line
-    int yCoord = Y_OFFSET;
+    int yCoord = Y_OFFSET - verticalScrollOffset;
     for (int i = 0; i<lines.size(); i++) {
         std::string & l = lines[i];
         for (int j = 0; j < l.size(); j++) {
@@ -256,14 +256,13 @@ void TextEditor::paintEvent(QPaintEvent *event) {
 
         char c = textBuffer->charAt(totalChars);
         if (c == '\n') {totalChars+=1;}
-        yCoord += charHeight; // Move to the next line
      }
      if (cursorLine == -1) {
         cursorLine = lines.size();
      }
      
     int cursorX = X_OFFSET + (cursorChar * charWidth);
-    int cursorY = Y_OFFSET + (cursorLine * charHeight);
+    int cursorY = Y_OFFSET + (cursorLine * charHeight) - verticalScrollOffset;
 
 
     painter.setPen(Qt::red);
@@ -271,6 +270,12 @@ void TextEditor::paintEvent(QPaintEvent *event) {
 
 }
 
+void TextEditor::wheelEvent(QWheelEvent *event) {
+    int delta = event->angleDelta().y();
+    verticalScrollOffset -= (delta/120) * charHeight;
+    if (verticalScrollOffset < 0) {verticalScrollOffset = 0;}
+    update(); 
+}
 
 void TextEditor::keyPressEvent(QKeyEvent * event) {
     // sync cursor
@@ -318,7 +323,7 @@ void TextEditor::mousePressEvent(QMouseEvent* event) {
     if (event->button() != Qt::LeftButton) {return;}
     // QPointF pos = event->position();
     int x = event->x();
-    int y = event->y();
+    int y = event->y() + verticalScrollOffset;
     if (x < X_OFFSET || y < Y_OFFSET) {return;}
     // determine if its left or right of the char
     
@@ -354,7 +359,6 @@ void TextEditor::mousePressEvent(QMouseEvent* event) {
     cursorIndex = cpt;
 
     this->textBuffer->moveCursor(cursorIndex);
-
     
     update();
 
