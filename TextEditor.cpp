@@ -271,9 +271,16 @@ void TextEditor::paintEvent(QPaintEvent *event) {
 }
 
 void TextEditor::wheelEvent(QWheelEvent *event) {
-    int delta = event->angleDelta().y();
+    int delta = event->angleDelta().y(); 
+
     verticalScrollOffset -= (delta/120) * charHeight;
     if (verticalScrollOffset < 0) {verticalScrollOffset = 0;}
+
+    
+    int maxOffset = charHeight * lines.size();
+    if (verticalScrollOffset > maxOffset) {verticalScrollOffset = maxOffset;}
+
+    
     update(); 
 }
 
