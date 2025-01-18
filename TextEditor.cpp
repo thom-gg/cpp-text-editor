@@ -18,6 +18,14 @@
 
 void TextEditor::fileHasBeenOpened(QString &content)
 {
+    std::cout << "File has been opened" << std::endl;
+    delete textBuffer;
+    std::string stdString = content.toStdString();
+    
+
+    textBuffer = new TextBuffer(stdString.data(), stdString.size());
+    cursorIndex = stdString.size();
+    
     // if (this->textEdit == nullptr)
     // {
     //     setupQTextEdit();
@@ -44,6 +52,12 @@ void TextEditor::newEmptyFile()
 // When the save button is pressed, or CTRL + S is pressed
 void TextEditor::saveFileTriggered()
 {
+    std::string stdString;
+    int length = textBuffer->length();
+    for (int i = 0; i<length; i++) {
+        stdString += textBuffer->charAt(i);
+    }
+    emit saveFileWithContent(QString::fromStdString(stdString));
     // if (this->textEdit == nullptr)
     // {
     //     return; // we're on welcome menu
@@ -445,9 +459,13 @@ TextEditor::TextEditor()
 {
     // Dummy data to try the paint function
     char * initText = "Hello !\nThis is a test text. Here comes a long sentence to try out automatic line wrapping when words go out of bounds";
-    textBuffer = new TextBuffer(initText, strlen(initText));
-    cursorIndex = strlen(initText);
-    //  setupWelcomeScreen(this);
+    // textBuffer = new TextBuffer(initText, strlen(initText));
+    textBuffer = new TextBuffer("", 0);
+    cursorIndex = 0;
+    cursorEndIndex = cursorIndex;
+    
+    
+    // setupWelcomeScreen(this);
 
     setCursor(Qt::IBeamCursor);
     // give focus to this widget
@@ -476,10 +494,10 @@ TextEditor::TextEditor()
         this->TextEditor::moveOneLineDown();
     });
 
-    // // Bind CTRL+S to save slot
-    // QShortcut * saveShortcut = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_S), this);
-    // saveShortcut->setAutoRepeat(false); // so it doesnt spam trigger when we keep it pressed
-    // connect(saveShortcut, &QShortcut::activated, this, &TextEditor::saveFileTriggered);
+    // Bind CTRL+S to save slot
+    QShortcut * saveShortcut = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_S), this);
+    saveShortcut->setAutoRepeat(false); // so it doesnt spam trigger when we keep it pressed
+    connect(saveShortcut, &QShortcut::activated, this, &TextEditor::saveFileTriggered);
 
     // QShortcut * zoomInShortcut = new QShortcut(QKeySequence::ZoomIn, this);
     // connect(zoomInShortcut, &QShortcut::activated, this, [this]() {updateZooming(10);});

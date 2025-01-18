@@ -15,7 +15,9 @@ class TextEditor : public QWidget
 private:
     int charWidth = 0;
     int charHeight = 0;
+
     int cursorIndex;
+    int cursorEndIndex; // should be equal to cursorIndex, except when doing a text selection
     int X_OFFSET = 50;
     int Y_OFFSET = 0;
     std::vector<std::string> lines;
