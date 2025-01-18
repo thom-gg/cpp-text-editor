@@ -12,13 +12,13 @@
 #include <QTimer>
 #include <QPoint>
 #include <QPixmap>
+#include <QStyleOption>
 
 #include "SillyCat.hpp"
 #include "CatFactory.hpp"
 
 void TextEditor::fileHasBeenOpened(QString &content)
 {
-    std::cout << "File has been opened" << std::endl;
     delete textBuffer;
     std::string stdString = content.toStdString();
     
@@ -52,27 +52,24 @@ void TextEditor::newEmptyFile()
 // When the save button is pressed, or CTRL + S is pressed
 void TextEditor::saveFileTriggered()
 {
+    // convert to stdstring
     std::string stdString;
     int length = textBuffer->length();
     for (int i = 0; i<length; i++) {
         stdString += textBuffer->charAt(i);
     }
+    // emit signal to FileManager
     emit saveFileWithContent(QString::fromStdString(stdString));
-    // if (this->textEdit == nullptr)
-    // {
-    //     return; // we're on welcome menu
-    // }
-    // // Emit signal to be caught by FileManager and actually saves the file. We pass the content (QString) as parameter
-    // emit saveFileWithContent(textEdit->toPlainText());
+    
 
-    // QColor originalColor = textEdit->palette().color(QPalette::Base);
-    // // Little animation (light green blink), to visually notify that it has been saved
-    // this->textEdit->setStyleSheet("QTextEdit { background-color:rgb(47, 54, 47) }");
+    QColor originalColor = palette().color(QPalette::Base);
+    // Little animation (light green blink), to visually notify that it has been saved
+    setStyleSheet("#TextEditor { background-color:rgb(47, 54, 47) }");
 
-    // // Create a single-shot timer to revert back to white after 200ms
-    // QTimer::singleShot(100, this, [this, originalColor]()
-    //                    { textEdit->setStyleSheet(QString("QTextEdit { background-color: %1 }")
-    //                                                  .arg(originalColor.name())); });
+    // Create a single-shot timer to revert back to white after 200ms
+    QTimer::singleShot(100, this, [this, originalColor]() {
+         setStyleSheet(QString("#TextEditor { background-color: %1 }").arg(originalColor.name())); 
+    });
 }
 
 void TextEditor::setupWelcomeScreen(QWidget *textEditor)
@@ -157,7 +154,12 @@ void TextEditor::printNewLine(int lineIndex, int & linesNumber, QPainter &painte
 }
 
 void TextEditor::paintEvent(QPaintEvent *event) {
+    QStyleOption opt;
+    opt.init(this);  
     QPainter painter(this);
+    // drawing the style sheet before doing our custom painting event (used for background color painting (save file blink for example))
+    style()->drawPrimitive(QStyle::PE_Widget, &opt, &painter, this);
+
     painter.setPen(Qt::white);
     // using a monospace font so we can count the width for each character and know where to break line
     painter.setFont(QFont("Courier", 20));
@@ -464,6 +466,9 @@ TextEditor::TextEditor()
     cursorIndex = 0;
     cursorEndIndex = cursorIndex;
     
+    this->setObjectName("TextEditor");
+    QColor originalColor = palette().color(QPalette::Base);
+    setStyleSheet(QString("#TextEditor { background-color: %1 }").arg(originalColor.name())); 
     
     // setupWelcomeScreen(this);
 
