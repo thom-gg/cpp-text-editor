@@ -255,7 +255,26 @@ void TextEditor::paintEvent(QPaintEvent *event) {
         yCoord += charHeight; // Move to the next line
     } 
     
-    // cursorIndex is up to date, just find where to draw it
+    int * cursorPos = findCursorPosition(cursorIndex);
+    if (cursorEndIndex != cursorIndex) {
+        int * cursorEndPos = findCursorPosition(cursorEndIndex);
+        if (cursorEndIndex < cursorIndex) {
+            painter.drawRect(cursorEndPos[0], cursorEndPos[1], charWidth * (cursorIndex - cursorEndIndex), charHeight);
+        }
+        else {
+            painter.drawRect(cursorPos[0], cursorPos[1], charWidth * (cursorEndIndex - cursorIndex), charHeight);
+        }
+        delete [] cursorEndPos;
+    }
+
+    painter.setPen(Qt::red);
+    painter.drawLine(cursorPos[0], cursorPos[1], cursorPos[0], cursorPos[1] + charHeight);
+
+    delete [] cursorPos;
+}
+
+// can be used to find both cursor position and cursorEnd position
+int * TextEditor::findCursorPosition(int index) {
     int cursorLine = -1;
     int cursorChar = 0;
     int totalChars = 0;
@@ -263,9 +282,9 @@ void TextEditor::paintEvent(QPaintEvent *event) {
          std::string & l = lines[i];
          int lSize = l.size();
 
-        if ( (totalChars + lSize) >= cursorIndex) {
+        if ( (totalChars + lSize) >= index) {
             cursorLine = i;
-            cursorChar = cursorIndex - totalChars;
+            cursorChar = index - totalChars;
             break;
         }
         totalChars += lSize;
@@ -276,14 +295,12 @@ void TextEditor::paintEvent(QPaintEvent *event) {
      if (cursorLine == -1) {
         cursorLine = lines.size();
      }
-     
     int cursorX = X_OFFSET + (cursorChar * charWidth);
     int cursorY = Y_OFFSET + (cursorLine * charHeight) - verticalScrollOffset;
-
-
-    painter.setPen(Qt::red);
-    painter.drawLine(cursorX, cursorY, cursorX, cursorY + charHeight);
-
+    int * res = new int[2]; // up to the caller to free this variable
+    res[0] = cursorX;
+    res[1] = cursorY;
+    return res;
 }
 
 void TextEditor::wheelEvent(QWheelEvent *event) {
@@ -303,8 +320,8 @@ void TextEditor::wheelEvent(QWheelEvent *event) {
 void TextEditor::keyPressEvent(QKeyEvent * event) {
     // sync cursor
     int key = event->key();
+    bool shiftPressed = event->modifiers() & Qt::ShiftModifier;
 
-   
     int maxWidth = (width() - X_OFFSET) / charWidth;
     // sync cursor
     this->textBuffer->moveCursor(cursorIndex);
@@ -314,6 +331,17 @@ void TextEditor::keyPressEvent(QKeyEvent * event) {
         case Qt::ALT:
         case Qt::Key_Tab:
             return;
+        
+        case Qt::Key_Left:
+        case Qt::Key_Right:
+            if (shiftPressed) {
+                cursorEndIndex += key == Qt::Key_Left ? -1 : 1;
+                if (cursorEndIndex < 0) {cursorEndIndex = 0;}     
+                int l = this->textBuffer->length();
+                if (cursorEndIndex > l) {cursorEndIndex = l;}       
+                update();
+            }
+            break;
 
         case Qt::Key_Backspace:
             this->textBuffer->backspace();
@@ -330,7 +358,6 @@ void TextEditor::keyPressEvent(QKeyEvent * event) {
             break;
 
         default:
-            bool shiftPressed = event->modifiers() & Qt::ShiftModifier;
             if (!shiftPressed && (key>=65 && key <= 90)) {
                 key += 32;
             }
@@ -382,6 +409,7 @@ void TextEditor::mousePressEvent(QMouseEvent* event) {
     }
     cpt += clickedChar;
     cursorIndex = cpt;
+    cursorEndIndex = cursorIndex;
 
     this->textBuffer->moveCursor(cursorIndex);
     
@@ -396,6 +424,7 @@ void TextEditor::moveCursorIndex(int delta) {
     if (cursorIndex < 0) {cursorIndex = 0;}
     int l = this->textBuffer->length();
     if (cursorIndex > l) {cursorIndex = l;}
+    cursorEndIndex = cursorIndex;
     update();
 }
 

@@ -34,6 +34,9 @@ private:
     void moveOneLineUp();
     void moveOneLineDown();
 
+    int * findCursorPosition(int index);
+
+
 public:
     TextEditor();
     ~TextEditor();
