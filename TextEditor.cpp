@@ -318,8 +318,10 @@ void TextEditor::keyPressEvent(QKeyEvent * event) {
         case Qt::Key_Backspace:
             this->textBuffer->backspace();
             this->moveCursorIndex(-1);
-            
-
+            break;
+        case Qt::Key_Delete:
+            this->textBuffer->delete_after();
+            update();
             break;
         case Qt::Key_Enter:
         case Qt::Key_Return:
