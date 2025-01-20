@@ -243,6 +243,23 @@ void TextEditor::paintEvent(QPaintEvent *event) {
     }
 
    
+    
+    
+    int * cursorPos = findCursorPosition(cursorIndex);
+    if (cursorEndIndex != cursorIndex) {
+        int * cursorEndPos = findCursorPosition(cursorEndIndex);
+        this->drawSelection(cursorPos, cursorEndPos, cursorEndIndex, painter);
+        delete [] cursorEndPos;
+    }
+    else {
+        painter.setPen(Qt::red);
+        painter.drawLine(cursorPos[0], cursorPos[1], cursorPos[0], cursorPos[1] + charHeight);
+        painter.setPen(Qt::white); 
+    }
+
+    
+    delete [] cursorPos;
+
     // draw text line by line
     int yCoord = Y_OFFSET - verticalScrollOffset;
     for (int i = 0; i<lines.size(); i++) {
@@ -254,23 +271,36 @@ void TextEditor::paintEvent(QPaintEvent *event) {
         }
         yCoord += charHeight; // Move to the next line
     } 
-    
-    int * cursorPos = findCursorPosition(cursorIndex);
-    if (cursorEndIndex != cursorIndex) {
-        int * cursorEndPos = findCursorPosition(cursorEndIndex);
+
+}
+
+void TextEditor::drawSelection(int * cursorPos, int *  cursorEndPos, int cursorEndIndex, QPainter &painter) {
+        int * minPos = cursorPos;
+        int * maxPos = cursorEndPos;
         if (cursorEndIndex < cursorIndex) {
-            painter.drawRect(cursorEndPos[0], cursorEndPos[1], charWidth * (cursorIndex - cursorEndIndex), charHeight);
+            minPos = cursorEndPos;
+            maxPos = cursorPos;
         }
-        else {
-            painter.drawRect(cursorPos[0], cursorPos[1], charWidth * (cursorEndIndex - cursorIndex), charHeight);
+   
+        for (int line = minPos[1]; line <= maxPos[1]; line+= charHeight) {
+            if (line == minPos[1] && line == maxPos[1]) {
+                // draw from minPos[0] to maxPos[0]
+                painter.fillRect(QRect(minPos[0], line, maxPos[0] - minPos[0], charHeight), "blue");
+            }
+            else if (line == minPos[1]) {
+                // draw from minPos[0] to end of line
+                painter.fillRect(QRect(minPos[0], line, width()  - minPos[0], charHeight), "blue");
+
+            }
+            else if (line == maxPos[1]) {
+                // draw from beginning of line (X_OFFSET) to maxPos[0] 
+                painter.fillRect(QRect(X_OFFSET, line, maxPos[0] - X_OFFSET, charHeight), "blue");
+            }
+            else {
+                // draw full line
+                painter.fillRect(QRect(X_OFFSET, line, width(), charHeight), "blue");
+            }
         }
-        delete [] cursorEndPos;
-    }
-
-    painter.setPen(Qt::red);
-    painter.drawLine(cursorPos[0], cursorPos[1], cursorPos[0], cursorPos[1] + charHeight);
-
-    delete [] cursorPos;
 }
 
 // can be used to find both cursor position and cursorEnd position
@@ -364,7 +394,6 @@ void TextEditor::keyPressEvent(QKeyEvent * event) {
             char c = key;
             this->textBuffer->insert(c);
             this->moveCursorIndex(1);
-            
             break;
     }
 
@@ -420,6 +449,20 @@ void TextEditor::mousePressEvent(QMouseEvent* event) {
 
 
 void TextEditor::moveCursorIndex(int delta) {
+    // get out of text selection
+    if (cursorIndex != cursorEndIndex) {
+        if (delta < 0) {
+            cursorIndex = std::min(cursorIndex, cursorEndIndex);
+            cursorEndIndex = cursorIndex;
+        }
+        else {
+            cursorIndex = std::max(cursorIndex, cursorEndIndex);
+            cursorEndIndex = cursorIndex;
+        }
+        update();
+        return;
+    }
+    // regular behavior
     cursorIndex += delta;
     if (cursorIndex < 0) {cursorIndex = 0;}
     int l = this->textBuffer->length();
@@ -456,6 +499,7 @@ void TextEditor::moveOneLineUp() {
             break;
         }    
     }
+    cursorEndIndex = cursorIndex;
     update();
 }
 
@@ -483,7 +527,7 @@ void TextEditor::moveOneLineDown() {
         }
         totalChars += sizeLine;
      }
-
+    cursorEndIndex = cursorIndex;
     update();
 
 }

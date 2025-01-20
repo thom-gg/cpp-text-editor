@@ -35,7 +35,7 @@ private:
     void moveOneLineDown();
 
     int * findCursorPosition(int index);
-
+    void drawSelection(int * cursorPos, int *  cursorEndPos, int cursorEndIndex, QPainter & painter);
 
 public:
     TextEditor();
