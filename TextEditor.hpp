@@ -31,8 +31,8 @@ private:
     void setupQTextEdit();
     void printNewLine(int , int &, QPainter &painter);
     void moveCursorIndex(int delta);
-    void moveOneLineUp();
-    void moveOneLineDown();
+    void moveOneLineUp(bool movingSelection);
+    void moveOneLineDown(bool movingSelection);
 
     int * findCursorPosition(int index);
     void drawSelection(int * cursorPos, int *  cursorEndPos, int cursorEndIndex, QPainter & painter);

@@ -372,7 +372,16 @@ void TextEditor::keyPressEvent(QKeyEvent * event) {
                 update();
             }
             break;
-
+        case Qt::Key_Up:
+            if (shiftPressed) {
+                this->moveOneLineUp(true);
+            }
+            break;
+        case Qt::Key_Down:
+            if (shiftPressed) {
+                this->moveOneLineDown(true);
+            }
+            break;
         case Qt::Key_Backspace:
             this->textBuffer->backspace();
             this->moveCursorIndex(-1);
@@ -471,9 +480,10 @@ void TextEditor::moveCursorIndex(int delta) {
     update();
 }
 
-void TextEditor::moveOneLineUp() {
+void TextEditor::moveOneLineUp(bool movingSelection = false) {
+    int index = movingSelection ? cursorEndIndex : cursorIndex;
     int totalChars = 0;
-    for (int i = 0; i<lines.size()-1; i++) {         
+    for (int i = 0; i<lines.size()-1; i++) {        
         std::string & l = lines[i];
 
         int sizeLine = l.size();        
@@ -481,29 +491,36 @@ void TextEditor::moveOneLineUp() {
         if (c == '\n') {sizeLine+=1;}
         totalChars += sizeLine;
 
-        if (i == 0 && totalChars >= cursorIndex) {
+        if (i == 0 && totalChars > index) {
             // if we were on first line, get to the beginning of it
-            cursorIndex = 0;
+            index = 0;
             break;
         }
 
         int totalAtNextLine = totalChars + lines[i+1].size();
-        if ( totalAtNextLine >= cursorIndex) { // if i+1 has the cursor, then i is the new line
+        if ( totalAtNextLine >= index) { // if i+1 has the cursor, then i is the new line
             // i is the new line
-            int cursorChar = (cursorIndex - totalChars);
+            int cursorChar = (index - totalChars);
             if (cursorChar > sizeLine) {
                 cursorChar = l.size();
             }
-            cursorIndex = (totalChars - sizeLine) + cursorChar;
+            index = (totalChars - sizeLine) + cursorChar;
             
             break;
         }    
     }
-    cursorEndIndex = cursorIndex;
+    if (!movingSelection) {
+        cursorIndex = index;
+        cursorEndIndex = cursorIndex;
+    }
+    else {
+        cursorEndIndex = index;
+    }
     update();
 }
 
-void TextEditor::moveOneLineDown() {
+void TextEditor::moveOneLineDown(bool movingSelection = false) {
+    int index = movingSelection ? cursorEndIndex : cursorIndex;
     int totalChars = 0;
     for (int i = 0; i<lines.size(); i++) {
          std::string & l = lines[i];
@@ -511,23 +528,29 @@ void TextEditor::moveOneLineDown() {
          char c = textBuffer->charAt(totalChars+sizeLine);
          if (c == '\n') {sizeLine+=1;}
 
-        if ( (totalChars + l.size()) >= cursorIndex) {
+        if ( (totalChars + l.size()) >= index) {
             // cursor is in line i
             if (i == (lines.size() - 1)) { // if its last line then move cursor to the very end
-                cursorIndex = this->textBuffer->length();
+                index = this->textBuffer->length();
                 break;
             }
 
-            int cursorChar = cursorIndex - totalChars;
+            int cursorChar = index - totalChars;
             if (cursorChar > lines[i+1].size()) {
                 cursorChar = lines[i+1].size();
             }
-            cursorIndex = totalChars + sizeLine + cursorChar;
+            index = totalChars + sizeLine + cursorChar;
             break;
         }
         totalChars += sizeLine;
      }
-    cursorEndIndex = cursorIndex;
+    if (!movingSelection) {
+        cursorIndex = index;
+        cursorEndIndex = cursorIndex;
+    }
+    else {
+        cursorEndIndex = index;
+    }
     update();
 
 }
