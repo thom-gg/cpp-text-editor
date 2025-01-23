@@ -108,8 +108,9 @@ void TextEditor::setupWelcomeScreen(QWidget *textEditor)
 
 void TextEditor::updateZooming(int amount)
 {
-    // will zoomOut if amount is negative
-    // textEdit->zoomIn(amount);
+    amount *= 3;
+    fontSize += amount;
+    update();
 }
 
 // Handle mouse wheel
@@ -146,10 +147,10 @@ void TextEditor::printNewLine(int lineIndex, int & linesNumber, QPainter &painte
 {
     linesNumber += 1; // draw line number
     painter.setPen(Qt::gray);
-    painter.setFont(QFont("Courier", 15));
+    painter.setFont(QFont("Courier", fontSize*0.80));
     painter.drawText(QRect(0, (Y_OFFSET + (lineIndex) * charHeight) - verticalScrollOffset, charWidth*2, charHeight), Qt::AlignLeft | Qt::AlignVCenter, QString("%1:").arg(linesNumber));
     painter.setPen(Qt::white);
-    painter.setFont(QFont("Courier", 20));
+    painter.setFont(QFont("Courier", fontSize));
 
 }
 
@@ -162,13 +163,14 @@ void TextEditor::paintEvent(QPaintEvent *event) {
 
     painter.setPen(Qt::white);
     // using a monospace font so we can count the width for each character and know where to break line
-    painter.setFont(QFont("Courier", 20));
+    painter.setFont(QFont("Courier", fontSize));
     
     lines.clear();
 
 
     QRect bounds = painter.boundingRect(rect(), Qt::AlignLeft, "A");
     charWidth = bounds.width();
+    X_OFFSET = 3* charWidth;
     charHeight = bounds.height();
     Y_OFFSET = charHeight;
     int maxWidth = width();
@@ -335,6 +337,11 @@ int * TextEditor::findCursorPosition(int index) {
 
 void TextEditor::wheelEvent(QWheelEvent *event) {
     int delta = event->angleDelta().y(); 
+    bool ctrlPressed = event->modifiers() & Qt::ControlModifier;
+    if (ctrlPressed) {
+        this->updateZooming(delta/120);
+        return;
+    }
 
     verticalScrollOffset -= (delta/120) * charHeight;
     if (verticalScrollOffset < 0) {verticalScrollOffset = 0;}
@@ -602,11 +609,15 @@ TextEditor::TextEditor()
     saveShortcut->setAutoRepeat(false); // so it doesnt spam trigger when we keep it pressed
     connect(saveShortcut, &QShortcut::activated, this, &TextEditor::saveFileTriggered);
 
-    // QShortcut * zoomInShortcut = new QShortcut(QKeySequence::ZoomIn, this);
-    // connect(zoomInShortcut, &QShortcut::activated, this, [this]() {updateZooming(10);});
+    QShortcut * zoomInShortcut = new QShortcut(QKeySequence::ZoomIn, this);
+    connect(zoomInShortcut, &QShortcut::activated, this, [this]() {
+        updateZooming(1);
+    });
 
-    // QShortcut * zoomOutShortcut = new QShortcut(QKeySequence::ZoomOut, this);
-    // connect(zoomOutShortcut, &QShortcut::activated, this, [this]() {updateZooming(-10);});
+    QShortcut * zoomOutShortcut = new QShortcut(QKeySequence::ZoomOut, this);
+    connect(zoomOutShortcut, &QShortcut::activated, this, [this]() {
+        updateZooming(-1);
+    });
 
     // factory = new CatFactory(this);
 }

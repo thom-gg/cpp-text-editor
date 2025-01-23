@@ -13,6 +13,8 @@ class TextEditor : public QWidget
 {
     Q_OBJECT
 private:
+    int fontSize = 20;
+
     int charWidth = 0;
     int charHeight = 0;
 
