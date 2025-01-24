@@ -416,26 +416,14 @@ void TextEditor::keyPressEvent(QKeyEvent * event) {
 
 }
 
-void TextEditor::mousePressEvent(QMouseEvent* event) {
-    if (event->button() != Qt::LeftButton) {return;}
-    // QPointF pos = event->position();
-    int x = event->x();
-    int y = event->y() + verticalScrollOffset;
-    if (x < X_OFFSET || y < Y_OFFSET) {return;}
-    // determine if its left or right of the char
-    
-
+int TextEditor::findCursorIndexForPos(int x, int y) {
     int clickedLine = (y-Y_OFFSET) / charHeight;
     if (clickedLine < 0) {
-        cursorIndex = 0;
-        update();
-        return;
+        return 0;
         
     }
     if (clickedLine >=lines.size()) {
-        cursorIndex = textBuffer->length();
-        update();
-        return;
+        return textBuffer->length();
     }
 
     const std::string &line = lines[clickedLine];
@@ -453,16 +441,47 @@ void TextEditor::mousePressEvent(QMouseEvent* event) {
         if (c == '\n') {cpt+=1;}
     }
     cpt += clickedChar;
-    cursorIndex = cpt;
+    return cpt;
+}
+
+void TextEditor::mousePressEvent(QMouseEvent* event) {
+    if (event->button() != Qt::LeftButton) {return;}
+    int x = event->x();
+    int y = event->y() + verticalScrollOffset;
+    if (x < X_OFFSET || y < Y_OFFSET) {return;}    
+
+    cursorIndex = findCursorIndexForPos(x,y);
     cursorEndIndex = cursorIndex;
+    isLeftClickPressed = true;
 
     this->textBuffer->moveCursor(cursorIndex);
+    
     
     update();
 
 }
 
+ void TextEditor::mouseMoveEvent(QMouseEvent * event) {
+    if (!isLeftClickPressed) {return;}
+    int x = event->x();
+    int y = event->y() + verticalScrollOffset;
+    if (x < X_OFFSET || y < Y_OFFSET) {return;}    
 
+    cursorEndIndex = findCursorIndexForPos(x,y);
+    update();
+ };
+
+void TextEditor::mouseReleaseEvent(QMouseEvent* event) {
+    if (event->button() != Qt::LeftButton) {return;}
+    int x = event->x();
+    int y = event->y() + verticalScrollOffset;
+    if (x < X_OFFSET || y < Y_OFFSET) {return;}    
+
+    cursorEndIndex = findCursorIndexForPos(x,y);
+    isLeftClickPressed = false;
+    update();
+        
+};
 
 void TextEditor::moveCursorIndex(int delta) {
     // get out of text selection

@@ -18,6 +18,8 @@ private:
     int charWidth = 0;
     int charHeight = 0;
 
+    bool isLeftClickPressed = false;
+
     int cursorIndex;
     int cursorEndIndex; // should be equal to cursorIndex, except when doing a text selection
     int X_OFFSET = 50;
@@ -35,6 +37,8 @@ private:
     void moveCursorIndex(int delta);
     void moveOneLineUp(bool movingSelection);
     void moveOneLineDown(bool movingSelection);
+
+    int findCursorIndexForPos(int x, int y);
 
     int * findCursorPosition(int index);
     void drawSelection(int * cursorPos, int *  cursorEndPos, int cursorEndIndex, QPainter & painter);
@@ -56,6 +60,8 @@ protected:
     void wheelEvent(QWheelEvent *event) override;
     void paintEvent(QPaintEvent *event) override;
     void mousePressEvent(QMouseEvent* event) override;
+    void mouseMoveEvent(QMouseEvent * event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
     void keyPressEvent(QKeyEvent *event) override;
 
 
