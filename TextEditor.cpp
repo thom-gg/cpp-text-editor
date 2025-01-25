@@ -112,15 +112,10 @@ void TextEditor::updateZooming(int amount)
 {
     amount *= 3;
     fontSize += amount;
+    if (fontSize < 1) {fontSize = 1;}
     update();
 }
 
-// Handle mouse wheel
-// void TextEditor::wheelEvent(QWheelEvent *event)
-// {
-//     const double degrees = event->angleDelta().y() / 8.0;
-//     updateZooming((degrees / 5));
-// }
 
 // Called when we get out of welcome screen
 void TextEditor::setupQTextEdit()
