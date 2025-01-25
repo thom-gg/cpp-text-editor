@@ -13,6 +13,8 @@
 #include <QPoint>
 #include <QPixmap>
 #include <QStyleOption>
+#include <QGuiApplication>
+#include <QClipboard>
 
 #include "SillyCat.hpp"
 #include "CatFactory.hpp"
@@ -362,11 +364,11 @@ void TextEditor::keyPressEvent(QKeyEvent * event) {
     int maxWidth = (width() - X_OFFSET) / charWidth;
     // sync cursor
     this->textBuffer->moveCursor(cursorIndex);
-
     switch (event->key()) {
         case Qt::Key_Shift:
-        case Qt::ALT:
+        case Qt::Key_Alt:
         case Qt::Key_Tab:
+        case Qt::Key_Control:
             return;
         
         case Qt::Key_Left:
@@ -581,6 +583,25 @@ void TextEditor::moveOneLineDown(bool movingSelection = false) {
 
 }
 
+void TextEditor::copySelection() {
+    if (cursorIndex == cursorEndIndex) {
+        return;
+    }
+    int start = cursorIndex < cursorEndIndex ? cursorIndex : cursorEndIndex;
+    int end = cursorIndex < cursorEndIndex ? cursorEndIndex : cursorIndex;
+    int size = end-start;
+    char * selectedText = new char[size];
+    for (int i = 0; i<size; i++) {
+        selectedText[i] = this->textBuffer->charAt(start+i);
+    }
+    QClipboard *clipboard = QGuiApplication::clipboard();
+    clipboard->setText(selectedText);
+
+    delete [] selectedText;
+
+
+}
+
 TextEditor::TextEditor()
 {
     // Dummy data to try the paint function
@@ -627,6 +648,12 @@ TextEditor::TextEditor()
     QShortcut * saveShortcut = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_S), this);
     saveShortcut->setAutoRepeat(false); // so it doesnt spam trigger when we keep it pressed
     connect(saveShortcut, &QShortcut::activated, this, &TextEditor::saveFileTriggered);
+
+
+    // Bind CTRL+C to copy
+    QShortcut * copyShortcut = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_C), this);
+    copyShortcut->setAutoRepeat(false);
+    connect(copyShortcut, &QShortcut::activated, this, &TextEditor::copySelection);
 
     QShortcut * zoomInShortcut = new QShortcut(QKeySequence::ZoomIn, this);
     connect(zoomInShortcut, &QShortcut::activated, this, [this]() {

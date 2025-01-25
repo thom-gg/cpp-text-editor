@@ -38,6 +38,9 @@ private:
     void moveOneLineUp(bool movingSelection);
     void moveOneLineDown(bool movingSelection);
 
+    void copySelection();
+    void paste();
+
     int findCursorIndexForPos(int x, int y);
 
     int * findCursorPosition(int index);
