@@ -153,3 +153,11 @@ char TextBuffer::operator[](int index) {
     return this->charAt(index);
 }
 
+void TextBuffer::deleteSelection(int start, int end) {
+    // move cursor to start
+    this->moveCursor(start);
+    for (int i = start; i<end; i++) {
+        this->delete_after();
+    }
+}
+

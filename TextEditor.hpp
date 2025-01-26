@@ -38,6 +38,8 @@ private:
     void moveOneLineUp(bool movingSelection);
     void moveOneLineDown(bool movingSelection);
 
+    void deleteSelection();
+
     void copySelection();
     void paste();
 

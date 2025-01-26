@@ -387,8 +387,15 @@ void TextEditor::keyPressEvent(QKeyEvent * event) {
             }
             break;
         case Qt::Key_Backspace:
-            this->textBuffer->backspace();
-            this->moveCursorIndex(-1);
+            if (cursorIndex != cursorEndIndex) {
+                this->deleteSelection();
+                update();
+            }
+            else {
+                this->textBuffer->backspace();
+                this->moveCursorIndex(-1);
+            }
+            
             break;
         case Qt::Key_Delete:
             this->textBuffer->delete_after();
@@ -396,11 +403,18 @@ void TextEditor::keyPressEvent(QKeyEvent * event) {
             break;
         case Qt::Key_Enter:
         case Qt::Key_Return:
+            if (cursorIndex != cursorEndIndex) {
+                this->deleteSelection();
+            }
             this->textBuffer->insert('\n');
             this->moveCursorIndex(1);
             break;
 
         default:
+            if (cursorIndex != cursorEndIndex) {
+                this->deleteSelection();
+            }
+
             if (!shiftPressed && (key>=65 && key <= 90)) {
                 key += 32;
             }
@@ -597,6 +611,33 @@ void TextEditor::copySelection() {
 
 }
 
+void TextEditor::deleteSelection() {
+    // remove selection, put cursor on the left then paste
+    int start = cursorIndex < cursorEndIndex ? cursorIndex : cursorEndIndex;
+    int end = cursorIndex < cursorEndIndex ? cursorEndIndex : cursorIndex;
+    this->textBuffer->deleteSelection(start, end);
+    cursorIndex = start;
+    cursorEndIndex = start;
+}
+
+void TextEditor::paste() {
+    if (cursorIndex != cursorEndIndex) {
+        this->deleteSelection();
+    }
+
+    // Insert content of clipboard
+    QClipboard *clipboard = QGuiApplication::clipboard();
+    QString text =  clipboard->text();
+    for (int i = 0; i<text.length(); i++) {
+        char c = text.at(i).toLatin1();
+        this->textBuffer->insert(c);
+        cursorIndex += 1;
+    }
+
+    cursorEndIndex = cursorIndex;
+    update();
+}
+
 TextEditor::TextEditor()
 {
     // Dummy data to try the paint function
@@ -649,6 +690,10 @@ TextEditor::TextEditor()
     QShortcut * copyShortcut = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_C), this);
     copyShortcut->setAutoRepeat(false);
     connect(copyShortcut, &QShortcut::activated, this, &TextEditor::copySelection);
+
+    QShortcut * pasteShortcut = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_V), this);
+    pasteShortcut->setAutoRepeat(false);
+    connect(pasteShortcut, &QShortcut::activated, this, &TextEditor::paste);
 
     QShortcut * zoomInShortcut = new QShortcut(QKeySequence::ZoomIn, this);
     connect(zoomInShortcut, &QShortcut::activated, this, [this]() {
