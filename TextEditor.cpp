@@ -599,7 +599,8 @@ void TextEditor::copySelection() {
     int start = cursorIndex < cursorEndIndex ? cursorIndex : cursorEndIndex;
     int end = cursorIndex < cursorEndIndex ? cursorEndIndex : cursorIndex;
     int size = end-start;
-    char * selectedText = new char[size];
+    char * selectedText = new char[size+1];
+    selectedText[size] = '\0';
     for (int i = 0; i<size; i++) {
         selectedText[i] = this->textBuffer->charAt(start+i);
     }
