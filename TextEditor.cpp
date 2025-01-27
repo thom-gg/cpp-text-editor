@@ -24,22 +24,9 @@ void TextEditor::fileHasBeenOpened(QString &content)
     delete textBuffer;
     std::string stdString = content.toStdString();
     
-
     textBuffer = new TextBuffer(stdString.data(), stdString.size());
     cursorIndex = stdString.size();
     
-    // if (this->textEdit == nullptr)
-    // {
-    //     setupQTextEdit();
-    //     factory->startTimer();
-    // }
-
-    // // Change the content of the text editor
-    // this->textEdit->setPlainText(content);
-    // // Set cursor initial position
-    // QTextCursor cursor = textEdit->textCursor();
-    // cursor.movePosition(QTextCursor::End);
-    // textEdit->setTextCursor(cursor);
 }
 
 void TextEditor::newEmptyFile()
@@ -74,39 +61,6 @@ void TextEditor::saveFileTriggered()
     });
 }
 
-void TextEditor::setupWelcomeScreen(QWidget *textEditor)
-{
-    QVBoxLayout *mainLayout = new QVBoxLayout();
-
-    QPushButton *button1 = new QPushButton("New file", textEditor);
-    QPushButton *button2 = new QPushButton("Open file", textEditor);
-    QPushButton *button3 = new QPushButton("Open folder", textEditor);
-
-    connect(button1, &QPushButton::clicked, this, &TextEditor::newEmptyFile);
-    connect(button2, &QPushButton::clicked, this, [this]()
-            { emit openFileRequested(); });
-
-    button1->setMinimumSize(100, 50); // Set minimum size for buttons
-    button2->setMinimumSize(100, 50);
-    button3->setMinimumSize(100, 50);
-
-    QHBoxLayout *row = new QHBoxLayout();
-    // Add buttons to the layouts
-    row->addSpacing(50);
-    row->addWidget(button1);
-    row->addSpacing(10);
-    row->addWidget(button2);
-    row->addSpacing(10);
-    row->addWidget(button3);
-    row->addStretch();
-
-    mainLayout->addSpacing(50);
-    mainLayout->addLayout(row);
-    mainLayout->addStretch();
-
-    // Apply layout to the widget
-    textEditor->setLayout(mainLayout);
-}
 
 void TextEditor::updateZooming(int amount)
 {
@@ -641,9 +595,7 @@ void TextEditor::paste() {
 
 TextEditor::TextEditor()
 {
-    // Dummy data to try the paint function
-    char * initText = "Hello !\nThis is a test text. Here comes a long sentence to try out automatic line wrapping when words go out of bounds";
-    // textBuffer = new TextBuffer(initText, strlen(initText));
+    
     textBuffer = new TextBuffer("", 0);
     cursorIndex = 0;
     cursorEndIndex = cursorIndex;
@@ -652,8 +604,6 @@ TextEditor::TextEditor()
     QColor originalColor = palette().color(QPalette::Base);
     setStyleSheet(QString("#TextEditor { background-color: %1 }").arg(originalColor.name())); 
     
-    // setupWelcomeScreen(this);
-
     setCursor(Qt::IBeamCursor);
     // give focus to this widget
     setFocusPolicy(Qt::StrongFocus);
