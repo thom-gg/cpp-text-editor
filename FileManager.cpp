@@ -11,7 +11,11 @@
 void FileManager::newEmptyFile() {
     this->unknown_file = true;
     QString untitled("untitled");
+    QString fileContent = "";
+    emit openedFile(fileContent);    
+    
     emit signalFileSavedOrOpened(untitled);
+
 }
 
 void FileManager::openFile() {

@@ -21,7 +21,9 @@
 
 void TextEditor::fileHasBeenOpened(QString &content)
 {
-    delete textBuffer;
+    if (textBuffer != nullptr) {
+        delete textBuffer;
+    }
     std::string stdString = content.toStdString();
     
     textBuffer = new TextBuffer(stdString.data(), stdString.size());
@@ -106,6 +108,7 @@ void TextEditor::printNewLine(int lineIndex, int & linesNumber, QPainter &painte
 }
 
 void TextEditor::paintEvent(QPaintEvent *event) {
+    if (this->textBuffer == nullptr) {return;}
     QStyleOption opt;
     opt.init(this);  
     QPainter painter(this);
@@ -349,10 +352,12 @@ void TextEditor::keyPressEvent(QKeyEvent * event) {
                 this->textBuffer->backspace();
                 this->moveCursorIndex(-1);
             }
-            
+            emit signalFileHasBeenModified();
+
             break;
         case Qt::Key_Delete:
             this->textBuffer->delete_after();
+            emit signalFileHasBeenModified();
             update();
             break;
         case Qt::Key_Enter:
@@ -361,6 +366,7 @@ void TextEditor::keyPressEvent(QKeyEvent * event) {
                 this->deleteSelection();
             }
             this->textBuffer->insert('\n');
+            emit signalFileHasBeenModified();
             this->moveCursorIndex(1);
             break;
 
@@ -375,6 +381,8 @@ void TextEditor::keyPressEvent(QKeyEvent * event) {
             char c = key;
             this->textBuffer->insert(c);
             this->moveCursorIndex(1);
+            emit signalFileHasBeenModified();
+
             break;
     }
 
@@ -563,7 +571,6 @@ void TextEditor::copySelection() {
 
     delete [] selectedText;
 
-
 }
 
 void TextEditor::deleteSelection() {
@@ -590,15 +597,17 @@ void TextEditor::paste() {
     }
 
     cursorEndIndex = cursorIndex;
+    
+    emit signalFileHasBeenModified();
     update();
 }
 
 TextEditor::TextEditor()
 {
     
-    textBuffer = new TextBuffer("", 0);
-    cursorIndex = 0;
-    cursorEndIndex = cursorIndex;
+    // textBuffer = new TextBuffer("", 0);
+    // cursorIndex = 0;
+    // cursorEndIndex = cursorIndex;
     
     this->setObjectName("TextEditor");
     QColor originalColor = palette().color(QPalette::Base);
@@ -655,6 +664,10 @@ TextEditor::TextEditor()
     connect(zoomOutShortcut, &QShortcut::activated, this, [this]() {
         updateZooming(-1);
     });
+
+    // waiting for next event loop iteration (so that the widget is fully constructed) before emitting this signal
+    QTimer::singleShot(0, this, &TextEditor::newEmptyFileRequested);
+
 
     // factory = new CatFactory(this);
 }
