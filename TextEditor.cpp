@@ -19,6 +19,8 @@
 #include "SillyCat.hpp"
 #include "CatFactory.hpp"
 
+#define DOUBLE_CLICK_DELAY 500 // max delay after which its not considered a double click but two clicks
+
 void TextEditor::fileHasBeenOpened(QString &content)
 {
     if (textBuffer != nullptr) {
@@ -417,17 +419,38 @@ int TextEditor::findCursorIndexForPos(int x, int y) {
     return cpt;
 }
 
+bool isAlphaNumerical(char c) {
+    return (c >= 'a' && c<='z') || (c >= 'A' && c<= 'Z') || (c >= '0' && c <= '9');
+}
+
 void TextEditor::mousePressEvent(QMouseEvent* event) {
     if (event->button() != Qt::LeftButton) {return;}
+    qint64 timestamp = event->timestamp();
+    qint64 diff = lastClick == 0 ? 0 : timestamp - lastClick;
+    lastClick = timestamp; // store last click, needed to detect double clicks
+
     int x = event->x();
     int y = event->y() + verticalScrollOffset;
     if (x < X_OFFSET || y < Y_OFFSET) {return;}    
 
+    int oldIndex = cursorIndex;
     cursorIndex = findCursorIndexForPos(x,y);
     cursorEndIndex = cursorIndex;
-    isLeftClickPressed = true;
+    if (diff < DOUBLE_CLICK_DELAY && oldIndex == cursorIndex && isAlphaNumerical(textBuffer->charAt(cursorIndex))) {
+        // select the whole word cursorIndex is in
+        int left = cursorIndex;
+        while (isAlphaNumerical(textBuffer->charAt(left))) {left-=1;}
+        int right = cursorIndex;
+        while (isAlphaNumerical(textBuffer->charAt(right))) {right+=1;}
+        cursorEndIndex = left+1;
+        cursorIndex=right;
+    }
+    else {
+        isLeftClickPressed = true;
 
-    this->textBuffer->moveCursor(cursorIndex);
+        this->textBuffer->moveCursor(cursorIndex); 
+    }
+   
     
     
     update();
@@ -446,6 +469,7 @@ void TextEditor::mousePressEvent(QMouseEvent* event) {
 
 void TextEditor::mouseReleaseEvent(QMouseEvent* event) {
     if (event->button() != Qt::LeftButton) {return;}
+    if (!isLeftClickPressed) {return;}
     int x = event->x();
     int y = event->y() + verticalScrollOffset;
     if (x < X_OFFSET || y < Y_OFFSET) {return;}    
