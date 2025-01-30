@@ -44,6 +44,8 @@ private:
     void copySelection();
     void paste();
 
+    void selectAll();
+
     int findCursorIndexForPos(int x, int y);
 
     int * findCursorPosition(int index);

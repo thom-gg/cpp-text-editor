@@ -626,6 +626,12 @@ void TextEditor::paste() {
     update();
 }
 
+void TextEditor::selectAll() {
+    cursorEndIndex = 0;
+    cursorIndex = this->textBuffer->length();
+    update();
+}
+
 TextEditor::TextEditor()
 {
     
@@ -678,6 +684,10 @@ TextEditor::TextEditor()
     QShortcut * pasteShortcut = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_V), this);
     pasteShortcut->setAutoRepeat(false);
     connect(pasteShortcut, &QShortcut::activated, this, &TextEditor::paste);
+
+    QShortcut * selectAllShortcut = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_A), this);
+    selectAllShortcut->setAutoRepeat(false);
+    connect(selectAllShortcut, &QShortcut::activated, this, &TextEditor::selectAll);
 
     QShortcut * zoomInShortcut = new QShortcut(QKeySequence::ZoomIn, this);
     connect(zoomInShortcut, &QShortcut::activated, this, [this]() {
