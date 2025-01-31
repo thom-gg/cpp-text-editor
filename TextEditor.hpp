@@ -20,6 +20,7 @@ private:
     int charHeight = 0;
 
     bool isLeftClickPressed = false;
+    bool syncVerticalOffset = false; // this is set to true when vertical offset should be synchronized with cursor (when a key is pressed usually)
 
     int cursorIndex;
     int cursorEndIndex; // should be equal to cursorIndex, except when doing a text selection

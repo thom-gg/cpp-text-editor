@@ -75,28 +75,6 @@ void TextEditor::updateZooming(int amount)
 }
 
 
-// Called when we get out of welcome screen
-void TextEditor::setupQTextEdit()
-{
-    // this->textEdit = new QTextEdit();
-    // this->textEdit->zoomIn(5);
-
-    // QVBoxLayout *mainLayout = new QVBoxLayout(this);
-    // mainLayout->setContentsMargins(0, 0, 0, 0);
-    // mainLayout->setSpacing(0);
-
-    // mainLayout->addWidget(this->textEdit);
-    // if (this->layout())
-    // {
-    //     delete this->layout(); // Clean up the old layout
-    // }
-    // this->setLayout(mainLayout);
-
-    // // Connect the "textChanged" signal from QTextEdit class to a custom one we're sending
-    // // (why? because I plan on getting rid of QTextEdit class later and implement all of this myself)
-    // connect(this->textEdit, &QTextEdit::textChanged, this, [this]()
-    //         { emit signalFileHasBeenModified(); });
-}
 
 void TextEditor::printNewLine(int lineIndex, int & linesNumber, QPainter &painter)
 {
@@ -129,9 +107,10 @@ void TextEditor::paintEvent(QPaintEvent *event) {
     X_OFFSET = 3* charWidth;
     charHeight = bounds.height();
     Y_OFFSET = charHeight;
-    int maxWidth = width();
+    int maxWidth = width();    
     int maxHeight = height();     
-    // // draw a grid   
+
+    // // draw a grid       
     // painter.setOpacity(0.1);
     // for (int i = 0; i<maxWidth; i+=charWidth) {
     //     for (int j = 0; j<maxHeight; j+=charHeight) {
@@ -204,6 +183,18 @@ void TextEditor::paintEvent(QPaintEvent *event) {
     
     
     int * cursorPos = findCursorPosition(cursorIndex);
+    if (cursorPos[1] < 0 && syncVerticalOffset) {
+        // should scroll up automatically
+        syncVerticalOffset = false;
+        verticalScrollOffset -= 2* charHeight + (0 - cursorPos[1]);
+        update();
+    }
+    else if (( cursorPos[1]+charHeight) > maxHeight && syncVerticalOffset) {        
+        // should scroll down automatically
+        syncVerticalOffset = false;
+        verticalScrollOffset += 2 *charHeight + (cursorPos[1]+charHeight - maxHeight);
+        update();
+    }
     if (cursorEndIndex != cursorIndex) {
         int * cursorEndPos = findCursorPosition(cursorEndIndex);
         this->drawSelection(cursorPos, cursorEndPos, cursorEndIndex, painter);
@@ -229,7 +220,6 @@ void TextEditor::paintEvent(QPaintEvent *event) {
         }
         yCoord += charHeight; // Move to the next line
     } 
-
 }
 
 void TextEditor::drawSelection(int * cursorPos, int *  cursorEndPos, int cursorEndIndex, QPainter &painter) {
@@ -318,6 +308,8 @@ void TextEditor::keyPressEvent(QKeyEvent * event) {
     int maxWidth = (width() - X_OFFSET) / charWidth;
     // sync cursor
     this->textBuffer->moveCursor(cursorIndex);
+    syncVerticalOffset = true;
+
     switch (event->key()) {
         case Qt::Key_Shift:
         case Qt::Key_Alt:
@@ -334,6 +326,7 @@ void TextEditor::keyPressEvent(QKeyEvent * event) {
                 if (cursorEndIndex > l) {cursorEndIndex = l;}       
                 update();
             }
+
             break;
         case Qt::Key_Up:
             if (shiftPressed) {
@@ -355,11 +348,14 @@ void TextEditor::keyPressEvent(QKeyEvent * event) {
                 this->moveCursorIndex(-1);
             }
             emit signalFileHasBeenModified();
+            syncVerticalOffset = true;
+
 
             break;
         case Qt::Key_Delete:
             this->textBuffer->delete_after();
             emit signalFileHasBeenModified();
+            syncVerticalOffset = true;
             update();
             break;
         case Qt::Key_Enter:
@@ -368,6 +364,7 @@ void TextEditor::keyPressEvent(QKeyEvent * event) {
                 this->deleteSelection();
             }
             this->textBuffer->insert('\n');
+            syncVerticalOffset = true;
             emit signalFileHasBeenModified();
             this->moveCursorIndex(1);
             break;
@@ -376,7 +373,7 @@ void TextEditor::keyPressEvent(QKeyEvent * event) {
             if (cursorIndex != cursorEndIndex) {
                 this->deleteSelection();
             }
-
+            syncVerticalOffset = true;
             if (!shiftPressed && (key>=65 && key <= 90)) {
                 key += 32;
             }
@@ -461,7 +458,6 @@ void TextEditor::mousePressEvent(QMouseEvent* event) {
     if (!isLeftClickPressed) {return;}
     int x = event->x();
     int y = event->y() + verticalScrollOffset;
-    if (x < X_OFFSET || y < Y_OFFSET) {return;}    
 
     cursorEndIndex = findCursorIndexForPos(x,y);
     update();
@@ -482,6 +478,8 @@ void TextEditor::mouseReleaseEvent(QMouseEvent* event) {
 
 void TextEditor::moveCursorIndex(int delta) {
     // get out of text selection
+    syncVerticalOffset = true;
+
     if (cursorIndex != cursorEndIndex) {
         if (delta < 0) {
             cursorIndex = std::min(cursorIndex, cursorEndIndex);
@@ -504,6 +502,8 @@ void TextEditor::moveCursorIndex(int delta) {
 }
 
 void TextEditor::moveOneLineUp(bool movingSelection = false) {
+    syncVerticalOffset = true;
+
     int index = movingSelection ? cursorEndIndex : cursorIndex;
     int totalChars = 0;
     for (int i = 0; i<lines.size()-1; i++) {        
@@ -543,6 +543,8 @@ void TextEditor::moveOneLineUp(bool movingSelection = false) {
 }
 
 void TextEditor::moveOneLineDown(bool movingSelection = false) {
+    syncVerticalOffset = true;
+
     int index = movingSelection ? cursorEndIndex : cursorIndex;
     int totalChars = 0;
     for (int i = 0; i<lines.size(); i++) {
@@ -607,6 +609,8 @@ void TextEditor::deleteSelection() {
 }
 
 void TextEditor::paste() {
+    syncVerticalOffset = true;
+
     if (cursorIndex != cursorEndIndex) {
         this->deleteSelection();
     }
