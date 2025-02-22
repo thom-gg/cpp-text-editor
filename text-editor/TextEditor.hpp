@@ -7,6 +7,26 @@
 #include <QWheelEvent>
 #include "./buffer/TextBuffer.hpp"
 
+#include <iostream>
+#include <QDebug>
+#include <QPushButton>
+#include <QHBoxLayout>
+#include <QShortcut>
+#include <QTextCursor>
+#include <QPainter>
+#include <QTimer>
+#include <QPoint>
+#include <QPixmap>
+#include <QStyleOption>
+#include <QGuiApplication>
+#include <QClipboard>
+
+#include "SillyCat.hpp"
+#include "CatFactory.hpp"
+
+#define DOUBLE_CLICK_DELAY 500 // max delay after which its not considered a double click but two clicks
+
+
 class CatFactory; // for circular dependencies
 
 class TextEditor : public QWidget
@@ -37,8 +57,8 @@ private:
     void setupQTextEdit();
     void printNewLine(int , int &, QPainter &painter);
     void moveCursorIndex(int delta);
-    void moveOneLineUp(bool movingSelection);
-    void moveOneLineDown(bool movingSelection);
+    void moveOneLineUp(bool movingSelection = false);
+    void moveOneLineDown(bool movingSelection = false);
 
     void deleteSelection();
 

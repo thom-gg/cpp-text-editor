@@ -10,7 +10,11 @@ SOURCES += \
     MainWindow.cpp \
     CustomMenu.cpp \
     FileManager.cpp \
-    TextEditor.cpp \
+    ./text-editor/TextEditor.cpp \
+    ./text-editor/TextEditorRender.cpp \
+    ./text-editor/TextEditorFile.cpp \
+    ./text-editor/TextEditorEvents.cpp \
+    ./text-editor/TextEditorCursor.cpp \
     ./fun/SillyCat.cpp \
     ./fun/CatFactory.cpp \
     ./buffer/TextBuffer.cpp
@@ -19,7 +23,7 @@ HEADERS += \
     MainWindow.hpp \
     CustomMenu.hpp \
     FileManager.hpp \
-    TextEditor.hpp  \
+    ./text-editor/TextEditor.hpp  \
     ./fun/SillyCat.hpp \
     ./fun/CatFactory.hpp \
     ./buffer/TextBuffer.hpp
