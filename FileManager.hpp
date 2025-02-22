@@ -11,16 +11,16 @@ class FileManager : public QWidget {
     public:
 
     signals:
-        void openedFile(QString &);
-        void signalFileSavedOrOpened(QString fileName);
+        void openedFile(std::string &);
+        void signalFileSavedOrOpened(std::string fileName);
 
     public slots:
         void openFile();
-        void saveFile(QString content);
+        void saveFile(std::string content);
         void newEmptyFile();
 
     private:
         bool unknown_file = true; // true if its not a real file we're modifying but a new file, to be saved later
-        QString fileName;
+        std::string fileName;
 
 };

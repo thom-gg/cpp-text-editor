@@ -21,15 +21,16 @@
 
 #define DOUBLE_CLICK_DELAY 500 // max delay after which its not considered a double click but two clicks
 
-void TextEditor::fileHasBeenOpened(QString &content)
+void TextEditor::fileHasBeenOpened(std::string &content)
 {
     if (textBuffer != nullptr) {
         delete textBuffer;
     }
-    std::string stdString = content.toStdString();
     
-    textBuffer = new TextBuffer(stdString.data(), stdString.size());
-    cursorIndex = stdString.size();
+    
+    textBuffer = new TextBuffer(content.data(), content.size());
+    cursorIndex = content.size();
+    cursorEndIndex = cursorIndex;
     
 }
 
@@ -38,7 +39,7 @@ void TextEditor::newEmptyFile()
     // We emit a signal to be caught by FileManager to store the info that its not a real file we're working in currently
     emit newEmptyFileRequested();
     // Open an editor with empty content
-    QString emptyContent;
+    std::string emptyContent;
     this->fileHasBeenOpened(emptyContent);
 }
 
@@ -52,7 +53,7 @@ void TextEditor::saveFileTriggered()
         stdString += textBuffer->charAt(i);
     }
     // emit signal to FileManager
-    emit saveFileWithContent(QString::fromStdString(stdString));
+    emit saveFileWithContent(stdString);
     
 
     QColor originalColor = palette().color(QPalette::Base);

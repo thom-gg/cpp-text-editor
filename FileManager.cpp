@@ -6,12 +6,16 @@
 #include <QtDebug>
 #include <QMessageBox>
 
+#include <fstream>
+#include <sstream>
+
 // Receiving the signal meaning that TextEditor is creating a new empty file.
 // we store it in the unknown_file member
 void FileManager::newEmptyFile() {
     this->unknown_file = true;
-    QString untitled("untitled");
-    QString fileContent = "";
+    std::string untitled("untitled");
+
+    std::string fileContent = "";
     emit openedFile(fileContent);    
     
     emit signalFileSavedOrOpened(untitled);
@@ -20,57 +24,45 @@ void FileManager::newEmptyFile() {
 
 void FileManager::openFile() {
      QString fileName = QFileDialog::getOpenFileName(nullptr, "Open File", "", "All Files (*)");
+     if (!fileName.isEmpty()) {
+        std::string name = fileName.toStdString();
 
-    if (!fileName.isEmpty()) {
-        QFile file(fileName);
-        if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-                    QTextStream in(&file);
-                    QString fileContent = in.readAll();
-                    file.close();
-                    this->fileName = fileName;
-                    this->unknown_file = false;
-                    // Emit the signal, with a reference to the content
-                    emit openedFile(fileContent);
-                    emit signalFileSavedOrOpened(fileName);
-            } else {
-                // Show an error message if the file couldn't be opened
-                QMessageBox::warning(nullptr, "Error", "Could not open the selected file.");
-             }
+        std::ifstream fileToRead(name);
+        if (!fileToRead) {
+            QMessageBox::warning(nullptr, "Error", "Could not open the selected file.");
+            return;
+        }
 
-        }
-        else {
-            // Cancelled the opening
-            // do nothing ?
-        }
+        std::ostringstream buffer;
+        buffer << fileToRead.rdbuf(); // read from file to buffer
+    
+        std::string content = buffer.str();
+
+        this->fileName = name;
+        this->unknown_file = false;
+        emit openedFile(content);
+        emit signalFileSavedOrOpened(name);
+    }
+        
 }
 
 
-void FileManager::saveFile(QString content) {
-
-    QFile * file = nullptr;
+void FileManager::saveFile(std::string content) {
+    std::ofstream * file = nullptr;
     if(this->unknown_file) { // if its a new file created by the editor, we need to prompt for a path where to save it
         // Prompt for a path
-        QString newFileName = QFileDialog::getSaveFileName(nullptr, "Save as", "", "All Files (*)");
+        std::string newFileName = QFileDialog::getSaveFileName(nullptr, "Save as", "", "All Files (*)").toStdString();
 
-        file = new QFile(newFileName);
+        file = new std::ofstream(newFileName);
         this->fileName = newFileName;
     }
     else {        
-        file = new QFile(this->fileName);
+        file = new std::ofstream(this->fileName);
     }
 
-    if (file->open(QIODevice::WriteOnly | QIODevice::Text)) {
-            QTextStream out(file);
-            out << content;  
-            file->close();    
-            this->unknown_file = false; // if we successfully wrote here it is not an unknown file anymore
-            emit signalFileSavedOrOpened(this->fileName);
-            
-    } else {
-            // Show an error message if the file couldn't be opened
-            QMessageBox::warning(nullptr, "Error", "Could not write to the file: " + fileName);
-    }
+    *file << content;
 
+    file->close();
     delete file;
 
 

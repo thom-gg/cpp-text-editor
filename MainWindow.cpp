@@ -32,8 +32,8 @@ void MainWindow::textHasChanged() {
 
 }
 
-void MainWindow::fileWasSavedOrOpened(QString fileName) {
-    setWindowTitle("Text editor: " + fileName);
+void MainWindow::fileWasSavedOrOpened(std::string fileName) {
+    setWindowTitle("Text editor: " + QString::fromStdString(fileName));
 }
 
 MainWindow::MainWindow() {
