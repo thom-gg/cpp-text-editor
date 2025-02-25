@@ -6,6 +6,7 @@
 #include <QVBoxLayout>
 #include <QWheelEvent>
 #include "./buffer/TextBuffer.hpp"
+#include "./stack/Stack.hpp"
 
 #include <iostream>
 #include <QDebug>

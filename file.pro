@@ -17,8 +17,9 @@ SOURCES += \
     ./text-editor/TextEditorCursor.cpp \
     ./fun/SillyCat.cpp \
     ./fun/CatFactory.cpp \
-    ./buffer/TextBuffer.cpp
+    ./buffer/TextBuffer.cpp 
 
+    
 HEADERS += \
     MainWindow.hpp \
     CustomMenu.hpp \
@@ -26,7 +27,8 @@ HEADERS += \
     ./text-editor/TextEditor.hpp  \
     ./fun/SillyCat.hpp \
     ./fun/CatFactory.hpp \
-    ./buffer/TextBuffer.hpp
+    ./buffer/TextBuffer.hpp \
+    ./stack/Stack.hpp
 
 
 # Qt modules
