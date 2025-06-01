@@ -2,7 +2,9 @@
 TEMPLATE = app
 TARGET = textEditor
 
-INCLUDEPATH += ./fun
+INCLUDEPATH += ./fun ./text-editor ./buffer ./stack
+
+CONFIG -= app_bundle
 
 # Sources and headers
 SOURCES += \

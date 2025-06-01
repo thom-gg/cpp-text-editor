@@ -3,7 +3,7 @@
 #include <cstring>
 
 // Init a TextBuffer with data 
-TextBuffer::TextBuffer(char * data, int dataSize) {
+TextBuffer::TextBuffer(const char * data, int dataSize) {
     // Allocate dataSize + gap size and copy data
     // initially the gap is at the end 
     int totalSize = dataSize + GAP_SIZE;

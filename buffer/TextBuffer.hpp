@@ -6,7 +6,7 @@
 // Implementing a Gap Buffer to allow quick insertion near cursor position
 class TextBuffer {
     public:
-        TextBuffer(char * data, int dataSize);
+        TextBuffer(const char * data, int dataSize);
         ~TextBuffer();
         void insert(char c);
         void moveCursor(int position); 
