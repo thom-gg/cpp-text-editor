@@ -6,7 +6,8 @@
 #include <QVBoxLayout>
 #include <QWheelEvent>
 #include "./buffer/TextBuffer.hpp"
-#include "./stack/Stack.hpp"
+#include "./undo/UndoEvent.hpp"
+#include "./undo/Stack.hpp"
 
 #include <iostream>
 #include <QDebug>
@@ -34,6 +35,7 @@ class TextEditor : public QWidget
 {
     Q_OBJECT
 private:
+    Stack<UndoEvent *> * stack = NULL;
     qint64 lastClick = 0;
     int fontSize = 20;
 
@@ -68,10 +70,17 @@ private:
 
     void selectAll();
 
+    void undoAction();
+    void redoAction();
+
     int findCursorIndexForPos(int x, int y);
 
     int * findCursorPosition(int index);
     void drawSelection(int * cursorPos, int *  cursorEndPos, int cursorEndIndex, QPainter & painter);
+
+
+    void registerAction(int cursorIndex, char c);
+    void undo();
 
 public:
     TextEditor();

@@ -62,8 +62,14 @@ TextEditor::TextEditor()
         updateZooming(-1);
     });
 
+    QShortcut * undoShortcut = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_Z), this);
+    connect(undoShortcut, &QShortcut::activated, this, &TextEditor::undoAction);
+
     // waiting for next event loop iteration (so that the widget is fully constructed) before emitting this signal
     QTimer::singleShot(0, this, &TextEditor::newEmptyFileRequested);
+
+
+    this->stack = new Stack<UndoEvent *>();
 
 
     // factory = new CatFactory(this);

@@ -19,7 +19,9 @@ SOURCES += \
     ./text-editor/TextEditorCursor.cpp \
     ./fun/SillyCat.cpp \
     ./fun/CatFactory.cpp \
-    ./buffer/TextBuffer.cpp 
+    ./buffer/TextBuffer.cpp \
+    ./undo/UndoEvent.cpp \
+    ./text-editor/TextEditorUndoManager.cpp
 
     
 HEADERS += \
@@ -30,8 +32,8 @@ HEADERS += \
     ./fun/SillyCat.hpp \
     ./fun/CatFactory.hpp \
     ./buffer/TextBuffer.hpp \
-    ./stack/Stack.hpp
-
+    ./undo/Stack.hpp   \
+    ./undo/UndoEvent.hpp
 
 # Qt modules
 QT += core gui widgets

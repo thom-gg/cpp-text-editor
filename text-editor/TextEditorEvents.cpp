@@ -29,7 +29,6 @@ void TextEditor::keyPressEvent(QKeyEvent * event) {
     int key = event->key();
     bool shiftPressed = event->modifiers() & Qt::ShiftModifier;
 
-    int maxWidth = (width() - X_OFFSET) / charWidth;
     // sync cursor
     this->textBuffer->moveCursor(cursorIndex);
     syncVerticalOffset = true;
@@ -103,6 +102,7 @@ void TextEditor::keyPressEvent(QKeyEvent * event) {
             }
             char c = key;
             this->textBuffer->insert(c);
+            this->registerAction(this->cursorIndex, c);
             this->moveCursorIndex(1);
             emit signalFileHasBeenModified();
 
@@ -173,3 +173,8 @@ void TextEditor::mouseReleaseEvent(QMouseEvent* event) {
     update();
         
 };
+
+
+void TextEditor::undoAction() {
+    this->undo();
+}
