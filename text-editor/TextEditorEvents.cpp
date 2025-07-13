@@ -67,7 +67,8 @@ void TextEditor::keyPressEvent(QKeyEvent * event) {
                 update();
             }
             else {
-                this->textBuffer->backspace();
+                char c = this->textBuffer->backspace();
+                this->registerDeletion(this->cursorIndex, c);
                 this->moveCursorIndex(-1);
             }
             emit signalFileHasBeenModified();
@@ -102,7 +103,7 @@ void TextEditor::keyPressEvent(QKeyEvent * event) {
             }
             char c = key;
             this->textBuffer->insert(c);
-            this->registerAction(this->cursorIndex, c);
+            this->registerInsertion(this->cursorIndex, c);
             this->moveCursorIndex(1);
             emit signalFileHasBeenModified();
 

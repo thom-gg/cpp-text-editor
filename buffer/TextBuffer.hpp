@@ -19,7 +19,7 @@ class TextBuffer {
 
         void deleteSelection(int start, int end);
 
-        void backspace();
+        char backspace();
         void delete_after(); // corresponds to the 'suppr' key on keyboard
     private:
         char * buffer;

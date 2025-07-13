@@ -101,10 +101,11 @@ void TextBuffer::right(int distance) {
     }
 }
 
-void TextBuffer::backspace() {
+char TextBuffer::backspace() {
     // move left pointer one to the left
-    if (leftPointer == 0) {return;}
+    if (leftPointer == 0) {return NULL;}
     leftPointer -= 1;
+    return buffer[leftPointer];
 }
 
 void TextBuffer::delete_after() {

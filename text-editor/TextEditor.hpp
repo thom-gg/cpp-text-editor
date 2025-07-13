@@ -78,8 +78,8 @@ private:
     int * findCursorPosition(int index);
     void drawSelection(int * cursorPos, int *  cursorEndPos, int cursorEndIndex, QPainter & painter);
 
-
-    void registerAction(int cursorIndex, char c);
+    void registerInsertion(int cursorIndex, char c);
+    void registerDeletion(int cursorIndex, char c);
     void undo();
 
 public:

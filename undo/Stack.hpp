@@ -83,7 +83,7 @@ void Stack<U>::push(U elt) {
 template <typename U>
 U Stack<U>::pop() {
     if (logicalSize == 0) {
-        throw std::out_of_range("The stack is empty - cannot pop");
+        return NULL;
     }
     U elt = this->array[logicalSize-1];
     this->logicalSize -= 1;
@@ -94,7 +94,7 @@ U Stack<U>::pop() {
 template <typename U>
 U Stack<U>::top() {
     if (logicalSize == 0) {
-        throw std::out_of_range("The stack is empty - cannot pop");
+        return NULL;
     }    
     return this->array[logicalSize-1];
 }
