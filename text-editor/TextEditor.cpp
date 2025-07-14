@@ -65,12 +65,15 @@ TextEditor::TextEditor()
     QShortcut * undoShortcut = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_Z), this);
     connect(undoShortcut, &QShortcut::activated, this, &TextEditor::undoAction);
 
+    QShortcut *redoShortcut = new QShortcut(QKeySequence::Redo, this);
+    connect(redoShortcut, &QShortcut::activated, this, &TextEditor::redoAction);
+
     // waiting for next event loop iteration (so that the widget is fully constructed) before emitting this signal
     QTimer::singleShot(0, this, &TextEditor::newEmptyFileRequested);
 
 
-    this->stack = new Stack<UndoEvent *>();
-
+    this->undoStack = new Stack<UndoEvent *>();
+    this->redoStack = new Stack<UndoEvent *>();
 
     // factory = new CatFactory(this);
 }

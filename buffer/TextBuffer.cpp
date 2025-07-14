@@ -108,8 +108,9 @@ char TextBuffer::backspace() {
     return buffer[leftPointer];
 }
 
-void TextBuffer::delete_after() {
+char TextBuffer::delete_after() {
     rightPointer += 1;
+    return buffer[rightPointer-1];
 }
 
 

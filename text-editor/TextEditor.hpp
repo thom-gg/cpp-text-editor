@@ -35,7 +35,9 @@ class TextEditor : public QWidget
 {
     Q_OBJECT
 private:
-    Stack<UndoEvent *> * stack = NULL;
+    Stack<UndoEvent *> * undoStack = NULL;
+    Stack<UndoEvent *> * redoStack = NULL;
+
     qint64 lastClick = 0;
     int fontSize = 20;
 
@@ -84,6 +86,8 @@ private:
     void registerPaste(int startIndex, QString content);
 
     void undo();
+    void redo();
+    void clearRedo();
 
 public:
     TextEditor();

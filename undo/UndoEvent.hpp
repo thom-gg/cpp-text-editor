@@ -14,5 +14,5 @@ class UndoEvent {
         std::string content;
         
         EventType type;
-        UndoEvent(int cursorIndex, EventType type, std::string content);
+        UndoEvent(int cursorIndex, int lastIndex, EventType type, std::string content);
 };

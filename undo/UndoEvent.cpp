@@ -3,9 +3,9 @@
 
 
 
-UndoEvent::UndoEvent(int cursorIndex, EventType type, std::string content) {
+UndoEvent::UndoEvent(int cursorIndex, int lastIndex, EventType type, std::string content) {
     this->cursorIndex = cursorIndex;
     this->type = type;
     this->content = content;
-    this->lastIndex = cursorIndex;
+    this->lastIndex = lastIndex;
 }

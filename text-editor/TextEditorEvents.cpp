@@ -61,7 +61,7 @@ void TextEditor::keyPressEvent(QKeyEvent * event) {
                 this->moveOneLineDown(true);
             }
             break;
-        case Qt::Key_Backspace:
+        case Qt::Key_Backspace: {
             if (cursorIndex != cursorEndIndex) {
                 this->deleteSelection();
                 update();
@@ -76,12 +76,15 @@ void TextEditor::keyPressEvent(QKeyEvent * event) {
 
 
             break;
-        case Qt::Key_Delete:
-            this->textBuffer->delete_after();
+        }
+        case Qt::Key_Delete: {
+            char c = this->textBuffer->delete_after();
+            this->registerDeletion(this->cursorIndex+1, c);
             emit signalFileHasBeenModified();
             syncVerticalOffset = true;
             update();
             break;
+        }
         case Qt::Key_Enter:
         case Qt::Key_Return:
             if (cursorIndex != cursorEndIndex) {
@@ -178,4 +181,8 @@ void TextEditor::mouseReleaseEvent(QMouseEvent* event) {
 
 void TextEditor::undoAction() {
     this->undo();
+}
+
+void TextEditor::redoAction() {
+    this->redo();
 }
