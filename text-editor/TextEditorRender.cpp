@@ -19,7 +19,7 @@ void TextEditor::printNewLine(int lineIndex, int & linesNumber, QPainter &painte
 
 }
 
-void TextEditor::paintEvent(QPaintEvent *event) {
+void TextEditor::paintEvent(QPaintEvent *) {
     if (this->textBuffer == nullptr) {return;}
     QStyleOption opt;
     opt.init(this);  
@@ -39,7 +39,7 @@ void TextEditor::paintEvent(QPaintEvent *event) {
     X_OFFSET = 3* charWidth;
     charHeight = bounds.height();
     Y_OFFSET = charHeight;
-    int maxWidth = width();    
+    unsigned long maxWidth = width();    
     int maxHeight = height();     
 
     // // draw a grid       
@@ -143,9 +143,9 @@ void TextEditor::paintEvent(QPaintEvent *event) {
 
     // draw text line by line
     int yCoord = Y_OFFSET - verticalScrollOffset;
-    for (int i = 0; i<lines.size(); i++) {
+    for (unsigned long i = 0; i<lines.size(); i++) {
         std::string & l = lines[i];
-        for (int j = 0; j < l.size(); j++) {
+        for (unsigned long j = 0; j < l.size(); j++) {
             char c = l[j];
             QRect charRect(X_OFFSET + (j * charWidth), yCoord, charWidth, charHeight);
             painter.drawText(charRect, Qt::AlignCenter, QString(c));

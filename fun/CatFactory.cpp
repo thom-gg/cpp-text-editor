@@ -30,18 +30,18 @@ void CatFactory::timerRoutine() {
 }
 
 void CatFactory::spawnCat() {
-    // Spawn a cat
-    std::cout<<"spawning a cat" <<std::endl;
-    QRect rectangleEditor = textEditor->rect();
-    int width = rectangleEditor.width();
-    int height = rectangleEditor.height();
-    // get random x coord
-    srand(time(0));
-    int rdmX = rand() % width;
-    QPoint start(rdmX, height);
-    QPoint end(rectangleEditor.center());  // Account for widget width
+    // // Spawn a cat
+    // std::cout<<"spawning a cat" <<std::endl;
+    // QRect rectangleEditor = textEditor->rect();
+    // int width = rectangleEditor.width();
+    // int height = rectangleEditor.height();
+    // // get random x coord
+    // srand(time(0));
+    // int rdmX = rand() % width;
+    // QPoint start(rdmX, height);
+    // QPoint end(rectangleEditor.center());  // Account for widget width
 
-    SillyCat * cat = new SillyCat(start, end, 3000, QSize(64, 64), static_cast<QWidget*>(this->textEditor));
+    // SillyCat * cat = new SillyCat(start, end, 3000, QSize(64, 64), static_cast<QWidget*>(this->textEditor));
 }
 
 void CatFactory::startTimer() {

@@ -39,10 +39,6 @@ CustomMenu::CustomMenu(QWidget* parent):QMenuBar(parent) {
     fileMenu->addAction(exitAct);
 
 
-    QMenu *settingsMenu = addMenu("Settings");
-
-    QMenu * aboutMenu = addMenu("About");
-
 
 
 }

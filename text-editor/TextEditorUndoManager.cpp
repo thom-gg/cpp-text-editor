@@ -8,11 +8,14 @@
 Anytime something is pushed into the UNDO stack, the REDO stack is cleared.
 */
 void TextEditor::clearRedo() {
-    this->redoStack->flush();
+    UndoEvent * top = NULL;
+    while ( (top = this->redoStack->pop()) != NULL) {
+        free(top);
+    }
 }
 
 void TextEditor::registerDeletion(int cursorIndex, char c) {
-    if (c == NULL) {return;}
+    if (c == '\0') {return;}
     clearRedo();
     UndoEvent * topElement = this->undoStack->top();
     if (topElement != NULL
@@ -67,7 +70,7 @@ void TextEditor::undo() {
         int delta = pop->cursorIndex - this->cursorIndex;
         this->moveCursorIndex(delta);
         this->textBuffer->moveCursor(pop->cursorIndex);
-        for (int i = 0; i<pop->content.size(); i++) {
+        for (unsigned long i = 0; i<pop->content.size(); i++) {
             this->textBuffer->delete_after();
         }
     }
@@ -76,7 +79,7 @@ void TextEditor::undo() {
         int delta = (pop->lastIndex) - this->cursorIndex;
         this->moveCursorIndex(delta);
         this->textBuffer->moveCursor(pop->lastIndex);
-        for (int i = 0; i<pop->content.size(); i++) {
+        for (unsigned long i = 0; i<pop->content.size(); i++) {
             this->textBuffer->insert(pop->content[i]);
         }
         this->moveCursorIndex(pop->content.size());
@@ -93,7 +96,7 @@ void TextEditor::redo() {
         int delta = (pop->cursorIndex) - this->cursorIndex;
         this->moveCursorIndex(delta);
         this->textBuffer->moveCursor(pop->cursorIndex);
-        for (int i = 0; i<pop->content.size(); i++) {
+        for (unsigned long i = 0; i<pop->content.size(); i++) {
             this->textBuffer->insert(pop->content[i]);
         }
         this->moveCursorIndex(pop->content.size());
@@ -102,7 +105,7 @@ void TextEditor::redo() {
         int delta = pop->lastIndex - this->cursorIndex;
         this->moveCursorIndex(delta);
         this->textBuffer->moveCursor(pop->lastIndex);
-        for (int i = 0; i<pop->content.size(); i++) {
+        for (unsigned long i = 0; i<pop->content.size(); i++) {
             this->textBuffer->delete_after();
         }
     }

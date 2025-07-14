@@ -10,7 +10,7 @@ int * TextEditor::findCursorPosition(int index) {
     int cursorLine = -1;
     int cursorChar = 0;
     int totalChars = 0;
-     for (int i = 0; i<lines.size(); i++) {
+     for (unsigned long i = 0; i<lines.size(); i++) {
          std::string & l = lines[i];
          int lSize = l.size();
 
@@ -38,7 +38,7 @@ int * TextEditor::findCursorPosition(int index) {
 
 
 int TextEditor::findCursorIndexForPos(int x, int y) {
-    int clickedLine = (y-Y_OFFSET) / charHeight;
+    unsigned long clickedLine = (y-Y_OFFSET) / charHeight;
     if (clickedLine < 0) {
         return 0;
         
@@ -48,14 +48,14 @@ int TextEditor::findCursorIndexForPos(int x, int y) {
     }
 
     const std::string &line = lines[clickedLine];
-    int clickedChar = (x-X_OFFSET)/charWidth;
+    unsigned long clickedChar = (x-X_OFFSET)/charWidth;
     if (clickedChar < 0) {clickedChar = 0;}
     else if (clickedChar >= line.size()) {
         clickedChar = line.size();
     }
 
     int cpt = 0;
-    for (int i = 0; i < clickedLine; i++) {
+    for (unsigned long i = 0; i < clickedLine; i++) {
         int size = lines[i].size();
         cpt += size;
         char c = textBuffer->charAt(cpt);
@@ -97,7 +97,7 @@ void TextEditor::moveOneLineUp(bool movingSelection) { // default value movingSe
 
     int index = movingSelection ? cursorEndIndex : cursorIndex;
     int totalChars = 0;
-    for (int i = 0; i<lines.size()-1; i++) {        
+    for (unsigned long i = 0; i<lines.size()-1; i++) {        
         std::string & l = lines[i];
 
         int sizeLine = l.size();        
@@ -136,9 +136,9 @@ void TextEditor::moveOneLineUp(bool movingSelection) { // default value movingSe
 void TextEditor::moveOneLineDown(bool movingSelection) {// default value movingSelection = false
     syncVerticalOffset = true;
 
-    int index = movingSelection ? cursorEndIndex : cursorIndex;
+    unsigned long index = movingSelection ? cursorEndIndex : cursorIndex;
     int totalChars = 0;
-    for (int i = 0; i<lines.size(); i++) {
+    for (unsigned long i = 0; i<lines.size(); i++) {
          std::string & l = lines[i];
          int sizeLine = l.size();        
          char c = textBuffer->charAt(totalChars+sizeLine);
@@ -151,7 +151,7 @@ void TextEditor::moveOneLineDown(bool movingSelection) {// default value movingS
                 break;
             }
 
-            int cursorChar = index - totalChars;
+            unsigned long cursorChar = index - totalChars;
             if (cursorChar > lines[i+1].size()) {
                 cursorChar = lines[i+1].size();
             }

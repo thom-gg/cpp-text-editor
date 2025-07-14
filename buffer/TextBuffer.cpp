@@ -103,7 +103,7 @@ void TextBuffer::right(int distance) {
 
 char TextBuffer::backspace() {
     // move left pointer one to the left
-    if (leftPointer == 0) {return NULL;}
+    if (leftPointer == 0) {return '\0';}
     leftPointer -= 1;
     return buffer[leftPointer];
 }
@@ -139,7 +139,7 @@ char TextBuffer::charAt(int index) {
     int gapBufferSize = rightPointer - leftPointer;
     if (index >= (bufSize - gapBufferSize)) {
         // out of bounds
-        return NULL;
+        return '\0';
     }
     
     // adapt index if needed
