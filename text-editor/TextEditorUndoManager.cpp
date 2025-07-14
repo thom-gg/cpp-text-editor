@@ -87,7 +87,6 @@ void TextEditor::undo() {
 
 
 void TextEditor::redo() {
-    std::cout<<"redoing"<<std::endl;
     UndoEvent * pop = this->redoStack->pop();
     if (pop == NULL) {return;}
     if (pop->type == INSERTION) {
