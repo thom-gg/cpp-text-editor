@@ -80,6 +80,9 @@ private:
 
     void registerInsertion(int cursorIndex, char c);
     void registerDeletion(int cursorIndex, char c);
+    void registerDeleteSelection(int startIndex, int endIndex);
+    void registerPaste(int startIndex, QString content);
+
     void undo();
 
 public:

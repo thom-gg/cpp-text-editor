@@ -14,8 +14,23 @@ void TextEditor::registerDeletion(int cursorIndex, char c) {
             topElement->lastIndex -= 1;
     }   
     else {
-        this->stack->push(new UndoEvent(cursorIndex, c, DELETION, std::string(1, c)));
+        this->stack->push(new UndoEvent(cursorIndex, DELETION, std::string(1, c)));
     } 
+}
+
+void TextEditor::registerDeleteSelection(int startIndex, int endIndex) {
+    std::string content = std::string(1,this->textBuffer->charAt(startIndex));
+    for (int i = startIndex+1; i<endIndex; i++) {
+        content.append(1, this->textBuffer->charAt(i));
+    }
+    UndoEvent * newEvent = new UndoEvent(endIndex-1, DELETION, content);
+    newEvent->lastIndex = startIndex+1;
+    this->stack->push(newEvent);
+}
+
+void TextEditor::registerPaste(int startIndex, QString q_content) {
+    std::string content = q_content.toStdString();
+    this->stack->push(new UndoEvent(startIndex, INSERTION, content));
 }
 
 void TextEditor::registerInsertion(int cursorIndex, char c) {
@@ -30,7 +45,7 @@ void TextEditor::registerInsertion(int cursorIndex, char c) {
         topElement->lastIndex += 1;
     }
     else {
-        this->stack->push(new UndoEvent(cursorIndex, c, INSERTION, std::string(1, c)));
+        this->stack->push(new UndoEvent(cursorIndex, INSERTION, std::string(1, c)));
     }
 }
 

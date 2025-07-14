@@ -195,6 +195,7 @@ void TextEditor::deleteSelection() {
     // remove selection, put cursor on the left then paste
     int start = cursorIndex < cursorEndIndex ? cursorIndex : cursorEndIndex;
     int end = cursorIndex < cursorEndIndex ? cursorEndIndex : cursorIndex;
+    this->registerDeleteSelection(start, end);
     this->textBuffer->deleteSelection(start, end);
     cursorIndex = start;
     cursorEndIndex = start;
@@ -210,6 +211,7 @@ void TextEditor::paste() {
     // Insert content of clipboard
     QClipboard *clipboard = QGuiApplication::clipboard();
     QString text =  clipboard->text();
+    this->registerPaste(cursorIndex, text);
     for (int i = 0; i<text.length(); i++) {
         char c = text.at(i).toLatin1();
         this->textBuffer->insert(c);
