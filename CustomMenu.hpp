@@ -8,6 +8,16 @@ class CustomMenu: public QMenuBar {
     Q_OBJECT
     public:
     CustomMenu(QWidget* parent);
+    ~CustomMenu();
+
+    private:
+        QMenu * fileMenu;
+        QAction * newAction;
+        QAction * openFileAct;
+        QAction * openFolderAct;
+        QAction * saveAct;
+        QAction * closeAct;
+        QAction * exitAct;
 
     signals:
         // File signals

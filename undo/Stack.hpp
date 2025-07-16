@@ -29,7 +29,6 @@ class Stack {
 // Implementation
 template <typename U>
 Stack<U>::Stack() {
-    std::cout << "In Stack constructor" << std::endl;
     std::cout << this->array << std::endl;
 
     this->array = new U[INITIAL_SIZE];
@@ -50,6 +49,9 @@ void Stack<U>::printStack() {
 
 template <typename U>
 Stack<U>::~Stack() {
+    for (int i = 0; i<this->logicalSize; i++) {
+        delete this->array[i];
+    }
     delete [] this->array;
 }
 

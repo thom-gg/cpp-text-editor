@@ -35,8 +35,21 @@ class TextEditor : public QWidget
 {
     Q_OBJECT
 private:
-    Stack<UndoEvent *> * undoStack = NULL;
-    Stack<UndoEvent *> * redoStack = NULL;
+    QShortcut * rightArrow;
+    QShortcut * leftArrow;
+    QShortcut * upArrow;
+    QShortcut * downArrow;
+    QShortcut * saveShortcut;
+    QShortcut * copyShortcut;
+    QShortcut * pasteShortcut;
+    QShortcut * selectAllShortcut;
+    QShortcut * zoomInShortcut;
+    QShortcut * zoomOutShortcut;
+    QShortcut * undoShortcut;
+    QShortcut * redoShortcut;
+
+    Stack<UndoEvent *> * undoStack = nullptr;
+    Stack<UndoEvent *> * redoStack = nullptr;
 
     qint64 lastClick = 0;
     int fontSize = 20;

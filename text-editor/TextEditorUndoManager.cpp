@@ -10,7 +10,7 @@ Anytime something is pushed into the UNDO stack, the REDO stack is cleared.
 void TextEditor::clearRedo() {
     UndoEvent * top = NULL;
     while ( (top = this->redoStack->pop()) != NULL) {
-        free(top);
+        delete top;
     }
 }
 
